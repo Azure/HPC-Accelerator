@@ -37,8 +37,7 @@ param adminUsername string
 
 @secure()
 param adminPassword string
-param ccScriptFilePath string = 'https://teraweazstorage.blob.${environment().suffixes.storage}/azstorage/initcc.sh?sp=r&st=2022-07-06T08:04:43Z&se=2040-07-06T16:04:43Z&sv=2021-06-08&sr=b&sig=62p8JWBwOFBnn1sq6%2BnjtBn7SjX6omKw%2BMHvoQApeHg%3D'
-param ccScriptFileName string = 'initcc.sh'
+param ccScriptFilePath string = 'https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/arm/script/ccloud_install.py'
 
 var nicName = '${prefix}-ni'
 var nsgName = '${prefix}-nsg'
@@ -253,7 +252,7 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'sh ${ccScriptFileName} azureSovereignCloud="${azureSovereignCloud}" tenantId="${tenantId}" applicationId="${applicationId}" applicationSecret="${applicationSecret}" username="${adminUsername}" hostname="${virtualMachineName_var}" password="${adminPassword}"'
+      commandToExecute: 'python ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${virtualMachineName_var}" --password "${adminPassword}" --acceptTerms'
         fileUris: [
           '${ccScriptFilePath}'
         ]
@@ -262,7 +261,7 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
 }
 
 
-output adminUsername string = adminUsername
-output excuteScript string = 'sudo python /home/${adminUsername}/AzureCycleCloudArmTemplate/script/ccloud_install.py --azureSovereignCloud ${azureSovereignCloud} --tenantId ${tenantId} --applicationId ${applicationId} --applicationSecret ${applicationSecret} --username ${adminUsername} --hostname ${virtualMachineName_var} --password ${adminPassword} --acceptTerms'
-@description('Refer : https://docs.microsoft.com/en-us/powershell/azure/authenticate-azureps?view=azps-8.1.0')
-output removeResourcesUsingPS string = 'Get-AzResource -TagName "${tagName}" -TagValue "${uniqueResourceNameBase}" | Remove-AzResource -force'
+//output adminUsername string = adminUsername
+//output excuteScript string = 'sudo python /home/${adminUsername}/AzureCycleCloudArmTemplate/script/ccloud_install.py --azureSovereignCloud ${azureSovereignCloud} --tenantId ${tenantId} --applicationId ${applicationId} --applicationSecret ${applicationSecret} --username ${adminUsername} --hostname ${virtualMachineName_var} --password ${adminPassword} --acceptTerms'
+//@description('Refer : https://docs.microsoft.com/en-us/powershell/azure/authenticate-azureps?view=azps-8.1.0')
+//output removeResourcesUsingPS string = 'Get-AzResource -TagName "${tagName}" -TagValue "${uniqueResourceNameBase}" | Remove-AzResource -force'
