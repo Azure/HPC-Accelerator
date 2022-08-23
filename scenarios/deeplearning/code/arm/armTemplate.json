@@ -1,339 +1,338 @@
 {
-    "$schema": "http://schema.management.azure.com/schemas/2019-08-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "location": {
-            "defaultValue": "westeurope",
-            "allowedValues": [
-                "westeurope",
-                "eastus",
-                "eastus2",
-                "westus",
-                "centralus"
-            ],
-            "type": "String",
-            "metadata": {
-                "description": "The type of replication to use for the Location."
-            }
-        },
-        "tenantId": {
-            "type": "String",
-             "metadata": {
-                "description": "The Organization directory to use."
-            }
-        },
-        "applicationId": {
-            "type": "String",
-            "metadata": {
-                "description": "This application should be contributor role in this subscription."
-            }
-        },
-        "applicationSecret": {
-            "type": "String",
-            "metadata": {
-                "description": "This applicationSecret should be this application"
-            }
-        },
-        "azureSovereignCloud": {
-            "defaultValue": "public",
-            "allowedValues": [
-                "public",
-                "china",
-                "germany",
-                "usgov"
-            ],
-            "maxLength": 36,
-            "type": "String",
-            "metadata": {
-                "description": "Azure National Cloud to use."
-            }
-        },
-        "prefix": {
-            "maxLength": 12,
-            "type": "String"
-        },
-        "virtualMachineSize": {
-            "type": "String"
-        },
-        "adminUsername": {
-            "type": "String"
-        },
-        "adminPassword": {
-            "type": "SecureString"
-        },
-        "ccScriptFilePath": {
-            "defaultValue": "https://teraweazstorage.blob.core.windows.net/azstorage/initcc.sh?sp=r&st=2022-07-06T08:04:43Z&se=2040-07-06T16:04:43Z&sv=2021-06-08&sr=b&sig=62p8JWBwOFBnn1sq6%2BnjtBn7SjX6omKw%2BMHvoQApeHg%3D",
-            "type": "String"
-        },
-        "ccScriptFileName": {
-            "defaultValue": "initcc.sh",
-            "type": "String"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "defaultValue": "westeurope",
+      "allowedValues": [
+        "westeurope",
+        "eastus",
+        "eastus2",
+        "westus",
+        "centralus"
+      ],
+      "type": "String",
+      "metadata": {
+        "description": "The type of replication to use for the Location."
+      }
     },
-    "variables": {
-        "networkInterfacesName": "[concat(parameters('prefix'), '-ni')]",
-        "networkSecurityGroupName": "[concat(parameters('prefix'), '-nsg')]",
-        "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
-        "virtualNetworkName": "[concat(parameters('prefix'), '-vnet')]",
-        "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-        "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
-        "publicIpAddressName": "[concat(parameters('prefix'), '-ip')]",
-        "virtualMachineName": "[concat(parameters('prefix'), '-vm')]",
-        "uniqueResourceNameBase": "[uniqueString(resourceGroup().id, parameters('location'), deployment().name)]",
-        "tagName" : "dlId",
-        "tags" : { "[variables('tagName')]": "[variables('uniqueResourceNameBase')]"}
-   },
-    "resources": [
-        {
-            "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2021-03-01",
-            "name": "[variables('networkInterfacesName')]",
-            "tags": "[variables('tags')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
-                "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
-            ],
-            "properties": {
-                "ipConfigurations": [
-                    {
-                        "name": "ipconfig1",
-                        "properties": {
-                            "subnet": {
-                                "id": "[variables('subnetRef')]"
-                            },
-                            "privateIPAllocationMethod": "Dynamic",
-                            "publicIpAddress": {
-                                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]",
-                                "properties": {
-                                    "deleteOption": "Detach"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "networkSecurityGroup": {
-                    "id": "[variables('nsgId')]"
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2019-02-01",
-            "name": "[variables('networkSecurityGroupName')]",
-            "tags": "[variables('tags')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "securityRules": [
-                    {
-                        "name": "HTTPS",
-                        "properties": {
-                            "priority": 1010,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceApplicationSecurityGroups": [],
-                            "destinationApplicationSecurityGroups": [],
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "443"
-                        }
-                    },
-                    {
-                        "name": "HTTP",
-                        "properties": {
-                            "priority": 1020,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceApplicationSecurityGroups": [],
-                            "destinationApplicationSecurityGroups": [],
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "80"
-                        }
-                    },
-                    {
-                        "name": "default-allow-ssh",
-                        "properties": {
-                            "priority": 1030,
-                            "protocol": "TCP",
-                            "access": "Allow",
-                            "direction": "Inbound",
-                            "sourceApplicationSecurityGroups": [],
-                            "destinationApplicationSecurityGroups": [],
-                            "sourceAddressPrefix": "*",
-                            "sourcePortRange": "*",
-                            "destinationAddressPrefix": "*",
-                            "destinationPortRange": "22"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2020-11-01",
-            "name": "[variables('virtualNetworkName')]",
-            "tags": "[variables('tags')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "addressSpace": {
-                    "addressPrefixes": [
-                        "10.8.0.0/16"
-                    ]
-                },
-                "subnets": [
-                    {
-                        "name": "default",
-                        "properties": {
-                            "addressPrefix": "10.8.0.0/24"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "type": "Microsoft.Network/publicIpAddresses",
-            "apiVersion": "2020-08-01",
-            "name": "[variables('publicIpAddressName')]",
-            "tags": "[variables('tags')]",
-            "location": "[parameters('location')]",
-            "sku": {
-                "name": "Basic"
-            },
-            "properties": {
-                "publicIpAllocationMethod": "Dynamic"
-            }
-        },
-        {
-            "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2021-07-01",
-            "name": "[variables('virtualMachineName')]",
-            "tags": "[variables('tags')]",
-            "location": "[parameters('location')]",
-            "dependsOn": [
-                "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfacesName'))]"
-            ],
-            "plan": {
-                "name": "cyclecloud8",
-                "publisher": "azurecyclecloud",
-                "product": "azure-cyclecloud"
-            },
-            "properties": {
-                "hardwareProfile": {
-                    "vmSize": "[parameters('virtualMachineSize')]"
-                },
-                "storageProfile": {
-                    "osDisk": {
-                        "createOption": "fromImage",
-                        "managedDisk": {
-                            "storageAccountType": "StandardSSD_LRS"
-                        },
-                        "deleteOption": "Delete"
-                    },
-                    "imageReference": {
-                        "publisher": "azurecyclecloud",
-                        "offer": "azure-cyclecloud",
-                        "sku": "cyclecloud8",
-                        "version": "latest"
-                    },
-                    "copy": [
-                        {
-                            "name": "dataDisks",
-                            "count": 1,
-                            "input": {
-                                "lun": 0,
-                                "createOption": "fromImage",
-                                "caching": "None",
-                                "diskSizeGB": null,
-                                "managedDisk": {
-                                    "id": null,
-                                    "storageAccountType": "StandardSSD_LRS"
-                                },
-                                "deleteOption": "Detach",
-                                "writeAcceleratorEnabled": false
-                            }
-                        }
-                    ]
-                },
-                "networkProfile": {
-                    "networkInterfaces": [
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfacesName'))]",
-                            "properties": {
-                                "deleteOption": "Detach"
-                            }
-                        }
-                    ]
-                },
-                "osProfile": {
-                    "computerName": "[variables('virtualMachineName')]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]",
-                    "linuxConfiguration": {
-                        "patchSettings": {
-                            "patchMode": "ImageDefault"
-                        }
-                    }
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": true
-                    }
-                }
-            }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2019-08-01",
-            "name": "ccportal.custom-script-linux",
-            "tags": "[variables('tags')]",
-            "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
-            ],
-            "properties": {
-                "mode": "incremental",
-                "templateLink": {
-                    "uri": "https://catalogartifact.azureedge.net/publicartifacts/microsoft.custom-script-linux-arm-2.0.57/MainTemplate.json"
-                },
-                "parameters": {
-                    "fileUris": {
-                        "value": [
-                            "[parameters('ccScriptFilePath')]"
-                        ]
-                    },
-                    "commandToExecute": {
-                        "value": "[concat('sh ', parameters('ccScriptFileName'), ' azureSovereignCloud=\"', parameters('azureSovereignCloud'), '\" ', 'tenantId=\"', parameters('tenantId'), '\" ', 'applicationId=\"', parameters('applicationId'), '\" ', 'applicationSecret=\"', parameters('applicationSecret'), '\" ', 'username=\"', parameters('adminUsername'), '\" ', 'hostname=\"', variables('virtualMachineName'), '\" ', 'password=\"', parameters('adminPassword'), '\"')]"
-                    },
-                    "vmName": {
-                        "value": "[variables('virtualMachineName')]"
-                    },
-                    "location": {
-                        "value": "[parameters('location')]"
-                    }
-                }
-            }
-        }
-    ],
-    "outputs": {
-        "adminUsername": {
-            "type": "String",
-            "value": "[parameters('adminUsername')]"
-        },
-        "excuteScript": {
-            "type": "String",
-            "value": "[concat('sudo python /home/', parameters('adminUsername'), '/AzureCycleCloudArmTemplate/script/ccloud_install.py --azureSovereignCloud ', parameters('azureSovereignCloud'), ' --tenantId ', parameters('tenantId'), ' --applicationId ', parameters('applicationId'), ' --applicationSecret ', parameters('applicationSecret'), ' --username ', parameters('adminUsername'), ' --hostname ', variables('virtualMachineName'), ' --password ', parameters('adminPassword'), ' --acceptTerms')]"
-        },
-        "removeResourcesUsingPS" : {
-            "type" : "String",
-            "value": "[concat('Get-AzResource -TagName \"', variables('tagName'), '\" -TagValue \"', variables('uniqueResourceNameBase'), '\" | Remove-AzResource -force')]",
-            "metadata": {
-                "description": "Refer : https://docs.microsoft.com/en-us/powershell/azure/authenticate-azureps?view=azps-8.1.0"
-            }
-        }
+    "tenantId": {
+      "type": "String",
+      "metadata": {
+        "description": "The Organization directory to use."
+      }
+    },
+    "applicationId": {
+      "type": "String",
+      "metadata": {
+        "description": "This application should be contributor role in this subscription."
+      }
+    },
+    "applicationSecret": {
+      "type": "String",
+      "metadata": {
+        "description": "This applicationSecret should be this application"
+      }
+    },
+    "azureSovereignCloud": {
+      "defaultValue": "public",
+      "allowedValues": [
+        "public",
+        "china",
+        "germany",
+        "usgov"
+      ],
+      "maxLength": 36,
+      "type": "String",
+      "metadata": {
+        "description": "Azure National Cloud to use."
+      }
+    },
+    "prefix": {
+      "maxLength": 12,
+      "type": "String"
+    },
+    "virtualMachineSize": {
+      "type": "String"
+    },
+    "adminUsername": {
+      "type": "String"
+    },
+    "adminPassword": {
+      "type": "SecureString"
+    },
+    "ccScriptFilePath": {
+      "defaultValue": "https://teraweazstorage.blob.core.windows.net/azstorage/initcc.sh?sp=r&st=2022-07-06T08:04:43Z&se=2040-07-06T16:04:43Z&sv=2021-06-08&sr=b&sig=62p8JWBwOFBnn1sq6%2BnjtBn7SjX6omKw%2BMHvoQApeHg%3D",
+      "type": "String"
+    },
+    "ccScriptFileName": {
+      "defaultValue": "initcc.sh",
+      "type": "String"
     }
+  },
+  "variables": {
+    "networkInterfacesName": "[concat(parameters('prefix'), '-ni')]",
+    "networkSecurityGroupName": "[concat(parameters('prefix'), '-nsg')]",
+    "nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+    "virtualNetworkName": "[concat(parameters('prefix'), '-vnet')]",
+    "vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/default')]",
+    "publicIpAddressName": "[concat(parameters('prefix'), '-ip')]",
+    "virtualMachineName": "[concat(parameters('prefix'), '-vm')]",
+    "uniqueResourceNameBase": "[uniqueString(resourceGroup().id, parameters('location'), deployment().name)]",
+    "tagName": "dlId",
+    "tags": { "[variables('tagName')]": "[variables('uniqueResourceNameBase')]" }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2020-11-01",
+      "name": "[variables('networkInterfacesName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]",
+                "properties": {
+                  "deleteOption": "Detach"
+                }
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[variables('nsgId')]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2019-02-01",
+      "name": "[variables('networkSecurityGroupName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "HTTPS",
+            "properties": {
+              "priority": 1010,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceApplicationSecurityGroups": [],
+              "destinationApplicationSecurityGroups": [],
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443"
+            }
+          },
+          {
+            "name": "HTTP",
+            "properties": {
+              "priority": 1020,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceApplicationSecurityGroups": [],
+              "destinationApplicationSecurityGroups": [],
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80"
+            }
+          },
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "priority": 1030,
+              "protocol": "TCP",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourceApplicationSecurityGroups": [],
+              "destinationApplicationSecurityGroups": [],
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2020-11-01",
+      "name": "[variables('virtualNetworkName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "10.8.0.0/16"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "default",
+            "properties": {
+              "addressPrefix": "10.8.0.0/24"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/publicIpAddresses",
+      "apiVersion": "2020-08-01",
+      "name": "[variables('publicIpAddressName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "sku": {
+        "name": "Basic"
+      },
+      "properties": {
+        "publicIpAllocationMethod": "Dynamic"
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2021-07-01",
+      "name": "[variables('virtualMachineName')]",
+      "tags": "[variables('tags')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfacesName'))]"
+      ],
+      "plan": {
+        "name": "cyclecloud8",
+        "publisher": "azurecyclecloud",
+        "product": "azure-cyclecloud"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('virtualMachineSize')]"
+        },
+        "storageProfile": {
+          "osDisk": {
+            "createOption": "fromImage",
+            "managedDisk": {
+              "storageAccountType": "StandardSSD_LRS"
+            },
+            "deleteOption": "Delete"
+          },
+          "imageReference": {
+            "publisher": "azurecyclecloud",
+            "offer": "azure-cyclecloud",
+            "sku": "cyclecloud8",
+            "version": "latest"
+          },
+          "copy": [
+            {
+              "name": "dataDisks",
+              "count": 1,
+              "input": {
+                "lun": 0,
+                "createOption": "fromImage",
+                "caching": "None",
+                "diskSizeGB": null,
+                "managedDisk": {
+                  "id": null,
+                  "storageAccountType": "StandardSSD_LRS"
+                },
+                "deleteOption": "Detach",
+                "writeAcceleratorEnabled": false
+              }
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfacesName'))]",
+              "properties": {
+                "deleteOption": "Detach"
+              }
+            }
+          ]
+        },
+        "osProfile": {
+          "computerName": "[variables('virtualMachineName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": {
+            "patchSettings": {
+              "patchMode": "ImageDefault"
+            }
+          }
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true
+          }
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2019-08-01",
+      "name": "ccportal.custom-script-linux",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+      ],
+      "properties": {
+        "mode": "incremental",
+        "templateLink": {
+          "uri": "https://catalogartifact.azureedge.net/publicartifacts/microsoft.custom-script-linux-arm-2.0.57/MainTemplate.json"
+        },
+        "parameters": {
+          "fileUris": {
+            "value": [
+              "[parameters('ccScriptFilePath')]"
+            ]
+          },
+          "commandToExecute": {
+            "value": "[concat('sh ', parameters('ccScriptFileName'), ' azureSovereignCloud=\"', parameters('azureSovereignCloud'), '\" ', 'tenantId=\"', parameters('tenantId'), '\" ', 'applicationId=\"', parameters('applicationId'), '\" ', 'applicationSecret=\"', parameters('applicationSecret'), '\" ', 'username=\"', parameters('adminUsername'), '\" ', 'hostname=\"', variables('virtualMachineName'), '\" ', 'password=\"', parameters('adminPassword'), '\"')]"
+          },
+          "vmName": {
+            "value": "[variables('virtualMachineName')]"
+          },
+          "location": {
+            "value": "[parameters('location')]"
+          }
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "adminUsername": {
+      "type": "String",
+      "value": "[parameters('adminUsername')]"
+    },
+    "excuteScript": {
+      "type": "String",
+      "value": "[concat('sudo python /home/', parameters('adminUsername'), '/AzureCycleCloudArmTemplate/script/ccloud_install.py --azureSovereignCloud ', parameters('azureSovereignCloud'), ' --tenantId ', parameters('tenantId'), ' --applicationId ', parameters('applicationId'), ' --applicationSecret ', parameters('applicationSecret'), ' --username ', parameters('adminUsername'), ' --hostname ', variables('virtualMachineName'), ' --password ', parameters('adminPassword'), ' --acceptTerms')]"
+    },
+    "removeResourcesUsingPS": {
+      "type": "String",
+      "value": "[concat('Get-AzResource -TagName \"', variables('tagName'), '\" -TagValue \"', variables('uniqueResourceNameBase'), '\" | Remove-AzResource -force')]",
+      "metadata": {
+        "description": "Refer : https://docs.microsoft.com/en-us/powershell/azure/authenticate-azureps?view=azps-8.1.0"
+      }
+    }
+  }
 }
