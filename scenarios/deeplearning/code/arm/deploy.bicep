@@ -41,12 +41,9 @@ param ccScriptFilePath string = 'https://raw.githubusercontent.com/Azure/HPC-Acc
 
 var nicName = '${prefix}-ni'
 var nsgName = '${prefix}-nsg'
-var nsgId = resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', nsgName)
 var vnetName = '${prefix}-vnet'
-var vnetId = resourceId(resourceGroup().name, 'Microsoft.Network/virtualNetworks', vnetName)
-var subnetRef = '${vnetId}/subnets/default'
-var publicIpAddressName_var = '${prefix}-ip'
-var virtualMachineName_var = '${prefix}-vm'
+var pipName = '${prefix}-ip'
+var vmName = '${prefix}-vm'
 var uniqueResourceNameBase = uniqueString(resourceGroup().id, location, deployment().name)
 var tagName = 'dlId'
 var tags = {
@@ -63,11 +60,11 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: subnetRef
+            id: vnet.properties.subnets[0].id
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
-            id: resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', publicIpAddressName_var)
+            id: pip.id
             properties: {
               deleteOption: 'Detach'
             }
@@ -76,14 +73,9 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
       }
     ]
     networkSecurityGroup: {
-      id: nsgId
+      id: nsg.id
     }
   }
-  dependsOn: [
-    nsg
-    vnet
-    pip
-  ]
 }
 
 resource nsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
@@ -163,7 +155,7 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = {
 }
 
 resource pip 'Microsoft.Network/publicIpAddresses@2020-08-01' = {
-  name: publicIpAddressName_var
+  name: pipName
   tags: tags
   location: location
   sku: {
@@ -175,7 +167,7 @@ resource pip 'Microsoft.Network/publicIpAddresses@2020-08-01' = {
 }
 
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
-  name: virtualMachineName_var
+  name: vmName
   tags: tags
   location: location
   plan: {
@@ -210,7 +202,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
           id: null
           storageAccountType: 'StandardSSD_LRS'
         }
-        deleteOption: 'Detach'
+        deleteOption: 'Delete'
         writeAcceleratorEnabled: false
       }]
     }
@@ -219,13 +211,13 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
         {
           id: nic.id
           properties: {
-            deleteOption: 'Detach'
+            deleteOption: 'Delete'
           }
         }
       ]
     }
     osProfile: {
-      computerName: virtualMachineName_var
+      computerName: vmName
       adminUsername: adminUsername
       adminPassword: adminPassword
       linuxConfiguration: {
@@ -252,7 +244,7 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'python ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${virtualMachineName_var}" --password "${adminPassword}" --acceptTerms'
+      commandToExecute: 'python ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${vmName}" --password "${adminPassword}" --acceptTerms'
         fileUris: [
           '${ccScriptFilePath}'
         ]
