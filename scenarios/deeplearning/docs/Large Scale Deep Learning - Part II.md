@@ -34,15 +34,11 @@ Large Scale Deep Learning Module: Part 2
 
 1. Create a new application registration similar to the following:
 
-
-
 ![Graphical user interface, text, application  Description automatically generated](./images/clip_image004.png)
 
 2. After registering the application, the corresponding overview screen should appear as shown below:
 
 ![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image006.png)
-
-
 
 From the overview screen of the newly registered application, copy the “Application (client) ID” and the “Directory (tenant) ID” to a temporary document for future use.
 
@@ -50,11 +46,7 @@ From the overview screen of the newly registered application, copy the “Applic
 
 a.   Select the subscription that Azure CycleCloud will make use of, and select the “Access control (IAM)” entry as shown below:
 
-
-
 ![Graphical user interface, application  Description automatically generated](./images/clip_image008.png)
-
-
 
 b.   By selecting “Add role assignment” on the previous, you will arrive at the screen below:
 
@@ -64,11 +56,7 @@ b.   By selecting “Add role assignment” on the previous, you will arrive at 
 
  c.   Next, add members to this new role assignment as follows – explicitly “dlatlarge” – as follows:
 
-
-
 ![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image012.png)
-
-
 
 As shown below, “dlatlarge” has been targeted as a member that has “Contributor” access to this subscription:
 
@@ -82,25 +70,13 @@ d.   Verify that the application (“datlarge”) has been successfully granted 
 
 ![Graphical user interface, text, application  Description automatically generated](./images/clip_image018.png)
 
-
-
 4. Return to the application registration view for the application of interest – here “dtatlarge” as shown below:
 
-
-
-
-
 ![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image020.png)
-
-
 
 5. From this view, click on “Add a certificate or secret” in the upper-right area to arrive at the view below. Note that in the view below, a “New client secret” was added.
 
 ![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image022.png)
-
-
-
-
 
 Copy and paste the value of the new client secret (“dtatlarge test” in this case) to temporary storage, as it will be needed shortly.
 
@@ -208,7 +184,7 @@ j.    Click on the node entry corresponding to the scheduler as below:
 
 a.   Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
 
-```
+```bash
 m.  sbatch -N 4 ./nccl.slrm
 ```
 
