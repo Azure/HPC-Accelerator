@@ -8,7 +8,7 @@ import random
 from string import ascii_letters, ascii_uppercase, ascii_lowercase, digits
 from subprocess import CalledProcessError, check_output
 from os import path, listdir, makedirs, chdir, fdopen, remove
-from urllib.request import urlopen, Request, HTTPError, URLError
+from urllib2 import urlopen, Request, HTTPError, URLError
 from urllib import urlretrieve
 from shutil import rmtree, copy2, move, copytree
 from tempfile import mkstemp, mkdtemp
@@ -16,7 +16,7 @@ from time import sleep
 
 
 tmpdir = mkdtemp()
-print("Creating temp directory " + tmpdir + " for installing CycleCloud")
+print "Creating temp directory " + tmpdir + " for installing CycleCloud"
 cycle_root = "/opt/cycle_server"
 cs_cmd = cycle_root + "/cycle_server"
 
@@ -27,11 +27,11 @@ def clean_up():
 def _catch_sys_error(cmd_list):
     try:
         output = check_output(cmd_list)
-        print(cmd_list)
-        print(output)
+        print cmd_list
+        print output
     except CalledProcessError as e:
-        print("Error with cmd: %s" % e.cmd)
-        print("Output: %s" % e.output)
+        print "Error with cmd: %s" % e.cmd
+        print "Output: %s" % e.output
         raise
 
 def create_user_credential(username):
@@ -53,10 +53,10 @@ def create_user_credential(username):
     copy2(credential_data_file, cycle_root + "/config/data/")
 
 def account_and_cli_setup(vm_metadata, tenant_id, application_id, application_secret, admin_user, azure_cloud, accept_terms, password, storageAccount):
-    print('Setting up azure account in CycleCloud and initializing cyclecloud CLI')
+    print "Setting up azure account in CycleCloud and initializing cyclecloud CLI"
 
     if path.isfile(cycle_root + "/config/data/account_data.json.imported"):
-        print('Azure account is already configured in CycleCloud. Skipping...')
+        print 'Azure account is already configured in CycleCloud. Skipping...'
         return
 
     subscription_id = vm_metadata["compute"]["subscriptionId"]
@@ -69,7 +69,7 @@ def account_and_cli_setup(vm_metadata, tenant_id, application_id, application_se
     cyclecloud_admin_pw = ""
 
     if password:
-        print('Password specified, using it as the admin password')
+        print 'Password specified, using it as the admin password'
         cyclecloud_admin_pw = password
     else:
         random_pw_chars = ([random.choice(ascii_lowercase) for _ in range(20)] +
@@ -79,7 +79,7 @@ def account_and_cli_setup(vm_metadata, tenant_id, application_id, application_se
         cyclecloud_admin_pw = ''.join(random_pw_chars)
 
     if storageAccount:
-        print('Storage account specified, using it as the default locker')
+        print 'Storage account specified, using it as the default locker'
         storage_account_name = storageAccount
     else:
         storage_account_name = 'cyclecloud' + random_suffix
@@ -147,20 +147,20 @@ def account_and_cli_setup(vm_metadata, tenant_id, application_id, application_se
     password_flag = ("--password=%s" % cyclecloud_admin_pw)
     sleep(5)
 
-    print('Initializing cylcecloud CLI')
+    print "Initializing cylcecloud CLI"
     _catch_sys_error(["/usr/local/bin/cyclecloud", "initialize", "--batch",
                       "--url=https://localhost", "--verify-ssl=false", "--username=root", password_flag])
 
     homedir = path.expanduser("~")
 
-    print('Registering Azure subscription')
+    print "Registering Azure subscription"
     # create the cloud provide account
     _catch_sys_error(["/usr/local/bin/cyclecloud", "account",
                       "create", "-f", azure_data_file])
 
     if not accept_terms:
         # reset the installation status so the splash screen re-appears
-        print('Resetting installation')
+        print "Resetting installation"
         sql_statement = 'update Application.Setting set Value = false where name ==\"cycleserver.installation.complete\"'
         _catch_sys_error(
             ["/opt/cycle_server/cycle_server", "execute", sql_statement])
@@ -176,11 +176,11 @@ def letsEncrypt(fqdn):
     try:
         cmd_list = [cs_cmd, "keystore", "automatic", "--accept-terms", fqdn]
         output = check_output(cmd_list)
-        print(cmd_list)
-        print(output)
+        print cmd_list
+        print output
     except CalledProcessError as e:
-        print('Error getting SSL cert from Lets Encrypt')
-        print('Proceeding with self-signed cert')
+        print "Error getting SSL cert from Lets Encrypt"
+        print "Proceeding with self-signed cert"
 
 
 def get_vm_metadata():
@@ -188,18 +188,18 @@ def get_vm_metadata():
     metadata_req = Request(metadata_url, headers={"Metadata": True})
 
     for i in range(30):
-        print('Fetching metadata')
+        print "Fetching metadata"
         metadata_response = urlopen(metadata_req, timeout=2)
 
         try:
             return json.load(metadata_response)
         except ValueError as e:
-            print("Failed to get metadata %s" % e)
-            print('    Retrying')
+            print "Failed to get metadata %s" % e
+            print "    Retrying"
             sleep(2)
             continue
         except:
-            print('Unable to obtain metadata after 30 tries')
+            print "Unable to obtain metadata after 30 tries"
             raise
 
 

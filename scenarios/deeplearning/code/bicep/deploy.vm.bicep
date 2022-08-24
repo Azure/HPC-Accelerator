@@ -1,54 +1,25 @@
 targetScope = 'resourceGroup'
 
-@description('The type of replication to use for the Location.')
-@allowed([
-  'westeurope'
-  'eastus'
-  'eastus2'
-  'westus'
-  'centralus'
-])
-param location string = 'westeurope'
-
-@description('The organization directory to use.')
-param tenantId string = tenant().tenantId
-
-@description('This application should be contributor role in this subscription.')
+param adminUsername string
 param applicationId string
+param azureSovereignCloud string
+param location string
+param prefix string
+param tags object
+param tenantId string = tenant().tenantId
+param virtualMachineSize string
 
-@description('This applicationSecret should be this application')
 @secure()
 param applicationSecret string
 
-@description('Azure National Cloud to use.')
-@maxLength(36)
-@allowed([
-  'public'
-  'china'
-  'germany'
-  'usgov'
-])
-param azureSovereignCloud string = 'public'
-
-@maxLength(12)
-param prefix string
-param virtualMachineSize string
-param adminUsername string
-
 @secure()
 param adminPassword string
-param ccScriptFilePath string = 'https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/arm/script/ccloud_install.py'
 
 var nicName = '${prefix}-ni'
 var nsgName = '${prefix}-nsg'
 var vnetName = '${prefix}-vnet'
 var pipName = '${prefix}-ip'
 var vmName = '${prefix}-vm'
-var uniqueResourceNameBase = uniqueString(resourceGroup().id, location, deployment().name)
-var tagName = 'dlId'
-var tags = {
-  '${tagName}': uniqueResourceNameBase
-}
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   name: nicName
@@ -60,7 +31,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: vnet.properties.subnets[0].id
+            id: subnet.id
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
@@ -133,7 +104,7 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
   }
 }
 
-resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = {
+resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
   name: vnetName
   tags: tags
   location: location
@@ -143,26 +114,29 @@ resource vnet 'Microsoft.Network/virtualNetworks@2020-11-01' = {
         '10.8.0.0/16'
       ]
     }
-    subnets: [
-      {
-        name: 'default'
-        properties: {
-          addressPrefix: '10.8.0.0/24'
-        }
-      }
-    ]
   }
 }
 
-resource pip 'Microsoft.Network/publicIpAddresses@2020-08-01' = {
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' = {
+  parent: vnet
+  name: 'default'
+  properties: {
+    addressPrefix: '10.8.0.0/24'
+  }
+}
+
+resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   name: pipName
   tags: tags
   location: location
   sku: {
-    name: 'Basic'
+    name: 'Standard'
   }
   properties: {
     publicIPAllocationMethod: 'Dynamic'
+    dnsSettings: {
+      domainNameLabel: prefix
+    }
   }
 }
 
@@ -211,7 +185,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
         {
           id: nic.id
           properties: {
-            deleteOption: 'Delete'
+            deleteOption: 'Detach'
           }
         }
       ]
@@ -225,6 +199,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
           patchMode: 'ImageDefault'
         }
       }
+      customData: loadFileAsBase64('../cloud-init/cloud-init.yaml')
     }
     diagnosticsProfile: {
       bootDiagnostics: {
@@ -236,6 +211,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
 
 resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = {
   parent: vm
+  location: location
   name: 'CustomScript'
   properties: {
     publisher: 'Microsoft.Azure.Extensions'
@@ -244,16 +220,10 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'python ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${vmName}" --password "${adminPassword}" --acceptTerms'
-        fileUris: [
-          '${ccScriptFilePath}'
-        ]
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; python /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${vmName}" --password "${adminPassword}" --acceptTerms'
+        fileUris: []
     }
   }
 }
 
-
-//output adminUsername string = adminUsername
-//output excuteScript string = 'sudo python /home/${adminUsername}/AzureCycleCloudArmTemplate/script/ccloud_install.py --azureSovereignCloud ${azureSovereignCloud} --tenantId ${tenantId} --applicationId ${applicationId} --applicationSecret ${applicationSecret} --username ${adminUsername} --hostname ${virtualMachineName_var} --password ${adminPassword} --acceptTerms'
-//@description('Refer : https://docs.microsoft.com/en-us/powershell/azure/authenticate-azureps?view=azps-8.1.0')
-//output removeResourcesUsingPS string = 'Get-AzResource -TagName "${tagName}" -TagValue "${uniqueResourceNameBase}" | Remove-AzResource -force'
+output fqdn string = pip.properties.dnsSettings.fqdn
