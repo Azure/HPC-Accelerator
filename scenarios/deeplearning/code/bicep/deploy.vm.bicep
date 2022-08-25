@@ -1,16 +1,12 @@
 targetScope = 'resourceGroup'
 
 param adminUsername string
-param applicationId string
 param azureSovereignCloud string
 param location string
 param prefix string
 param tags object
 param tenantId string = tenant().tenantId
 param virtualMachineSize string
-
-@secure()
-param applicationSecret string
 
 @secure()
 param adminPassword string
@@ -20,6 +16,7 @@ var nsgName = '${prefix}-nsg'
 var vnetName = '${prefix}-vnet'
 var pipName = '${prefix}-ip'
 var vmName = '${prefix}-vm'
+var storageAccountName = '${prefix}${deployment().name}'
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   name: nicName
@@ -133,7 +130,7 @@ resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
     name: 'Standard'
   }
   properties: {
-    publicIPAllocationMethod: 'Dynamic'
+    publicIPAllocationMethod: 'Static'
     dnsSettings: {
       domainNameLabel: prefix
     }
@@ -148,6 +145,9 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
     name: 'cyclecloud8'
     publisher: 'azurecyclecloud'
     product: 'azure-cyclecloud'
+  }
+  identity: {
+    type: 'SystemAssigned'
   }
   properties: {
     hardwareProfile: {
@@ -220,10 +220,11 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; python /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --applicationId "${applicationId}" --applicationSecret "${applicationSecret}" --username "${adminUsername}" --hostname "${vmName}" --password "${adminPassword}" --acceptTerms'
-        fileUris: []
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; python3 /root/cyclecloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
+      fileUris: []
     }
   }
 }
 
 output fqdn string = pip.properties.dnsSettings.fqdn
+output identity string = vm.identity.principalId

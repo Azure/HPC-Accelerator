@@ -13,13 +13,6 @@ param location string = deployment().location
 @description('The organization directory to use.')
 param tenantId string = tenant().tenantId
 
-@description('This application should be contributor role in this subscription.')
-param applicationId string
-
-@description('This applicationSecret should be this application')
-@secure()
-param applicationSecret string
-
 @description('Azure National Cloud to use.')
 @maxLength(36)
 @allowed([
@@ -56,8 +49,6 @@ module vm 'deploy.vm.bicep' = {
   params: {
     adminPassword: adminPassword
     adminUsername: adminUsername
-    applicationId: applicationId
-    applicationSecret: applicationSecret
     azureSovereignCloud: azureSovereignCloud
     location: location
     prefix: prefix
