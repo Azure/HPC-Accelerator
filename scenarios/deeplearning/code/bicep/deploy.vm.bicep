@@ -11,12 +11,13 @@ param virtualMachineSize string
 @secure()
 param adminPassword string
 
+var uniqueResourceNameBase = uniqueString(subscription().id, resourceGroup().id, location, deployment().name)
 var nicName = '${prefix}-ni'
 var nsgName = '${prefix}-nsg'
 var vnetName = '${prefix}-vnet'
 var pipName = '${prefix}-ip'
 var vmName = '${prefix}-vm'
-var storageAccountName = '${prefix}${deployment().name}'
+var storageAccountName = uniqueResourceNameBase
 
 resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
   name: nicName
@@ -111,15 +112,20 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
         '10.8.0.0/16'
       ]
     }
+    subnets: [
+      {
+        name: 'default'
+        properties: {
+          addressPrefix: '10.8.0.0/24'
+        }
+      }
+    ]
   }
 }
 
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' = {
+resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
   parent: vnet
   name: 'default'
-  properties: {
-    addressPrefix: '10.8.0.0/24'
-  }
 }
 
 resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
@@ -137,6 +143,10 @@ resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   }
 }
 
+resource mi 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: '${prefix}-mi'
+}
+
 resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
   name: vmName
   tags: tags
@@ -147,7 +157,10 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
     product: 'azure-cyclecloud'
   }
   identity: {
-    type: 'SystemAssigned'
+    type: 'UserAssigned'
+    userAssignedIdentities: {
+      '${mi.id}': {}
+    }
   }
   properties: {
     hardwareProfile: {
@@ -220,11 +233,8 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; python3 /root/cyclecloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep 300; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
       fileUris: []
     }
   }
 }
-
-output fqdn string = pip.properties.dnsSettings.fqdn
-output identity string = vm.identity.principalId
