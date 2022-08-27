@@ -31,7 +31,6 @@ param adminUsername string
 @secure()
 param adminPassword string
 
-var contributorRoleDefinitionId = '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c'
 var rgName = '${prefix}-rg'
 var uniqueResourceNameBase = uniqueString(subscription().id, location, deployment().name)
 var tagName = 'dlId'
@@ -53,20 +52,6 @@ module mi 'deploy.managedidentity.bicep' = {
   }
 }
 
-resource ra 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
-  name: guid(uniqueResourceNameBase)
-  properties: {
-    principalId: miexisting.properties.principalId
-    roleDefinitionId: contributorRoleDefinitionId
-    principalType: 'ServicePrincipal'
-  }
-}
-
-resource miexisting 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  name: '${prefix}-mi'
-  scope: rg
-}
-
 module vm 'deploy.vm.bicep' = {
   scope: rg
   name: '${uniqueResourceNameBase}-vm'
@@ -80,5 +65,5 @@ module vm 'deploy.vm.bicep' = {
     tenantId: tenantId
     virtualMachineSize: virtualMachineSize
   }
-  dependsOn: [ra]
+  dependsOn: [mi]
 }
