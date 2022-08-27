@@ -39,7 +39,7 @@ param adminPassword string
 
 var contributorRoleDefinitionId = '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c'
 var rgName = '${prefix}-rg'
-var uniqueResourceNameBase = uniqueString(subscription().id, location, deployment().name)
+var uniqueResourceNameBase = uniqueString(subscription().id, location, tenantId, prefix)
 var tagName = 'dlId'
 var tags = {
   '${tagName}': uniqueResourceNameBase
