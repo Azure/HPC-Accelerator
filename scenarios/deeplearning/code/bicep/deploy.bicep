@@ -10,6 +10,12 @@ targetScope = 'subscription'
 // ])
 param location string = deployment().location
 
+
+@maxValue(600)
+@minValue(0)
+@description('Number of seconds to wait for Azure to colsolidate the new roleAssignment before continuing with the deployment of the custom script extension.')
+param secondsToWaitBeforeCustomScriptExec int = 180
+
 @description('The organization directory to use.')
 param tenantId string = tenant().tenantId
 
@@ -53,19 +59,15 @@ module mi 'deploy.managedidentity.bicep' = {
   }
 }
 
-resource miexisting 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  name: '${prefix}-mi'
-  scope: rg
-}
-
 resource ra 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(uniqueResourceNameBase)
   properties: {
-    principalId: miexisting.properties.principalId
+    principalId: mi.outputs.principalId
     roleDefinitionId: contributorRoleDefinitionId
     principalType: 'ServicePrincipal'
   }
 }
+
 
 module vm 'deploy.vm.bicep' = {
   scope: rg
@@ -76,9 +78,12 @@ module vm 'deploy.vm.bicep' = {
     azureSovereignCloud: azureSovereignCloud
     location: location
     prefix: prefix
+    secondsToWaitBeforeCustomScriptExec: secondsToWaitBeforeCustomScriptExec
     tags: tags
     tenantId: tenantId
     virtualMachineSize: virtualMachineSize
   }
   dependsOn: [ra]
 }
+
+output fqdn string = vm.outputs.fqdn

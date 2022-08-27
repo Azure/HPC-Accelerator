@@ -7,6 +7,9 @@ param prefix string
 param tags object
 param tenantId string = tenant().tenantId
 param virtualMachineSize string
+@maxValue(600)
+@minValue(0)
+param secondsToWaitBeforeCustomScriptExec int = 180
 
 @secure()
 param adminPassword string
@@ -83,21 +86,21 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
           destinationPortRange: '80'
         }
       }
-      {
-        name: 'default-allow-ssh'
-        properties: {
-          priority: 1030
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '22'
-        }
-      }
+      // {
+      //   name: 'default-allow-ssh'
+      //   properties: {
+      //     priority: 1030
+      //     protocol: 'TCP'
+      //     access: 'Allow'
+      //     direction: 'Inbound'
+      //     sourceApplicationSecurityGroups: []
+      //     destinationApplicationSecurityGroups: []
+      //     sourceAddressPrefix: '*'
+      //     sourcePortRange: '*'
+      //     destinationAddressPrefix: '*'
+      //     destinationPortRange: '22'
+      //   }
+      // }
     ]
   }
 }
@@ -233,8 +236,10 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep 300; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep ${secondsToWaitBeforeCustomScriptExec}; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
       fileUris: []
     }
   }
 }
+
+output fqdn string = pip.properties.dnsSettings.fqdn
