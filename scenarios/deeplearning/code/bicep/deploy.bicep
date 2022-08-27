@@ -53,11 +53,6 @@ module mi 'deploy.managedidentity.bicep' = {
   }
 }
 
-resource miexisting 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
-  name: '${prefix}-mi'
-  scope: rg
-}
-
 resource ra 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(uniqueResourceNameBase)
   properties: {
@@ -65,6 +60,11 @@ resource ra 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
     roleDefinitionId: contributorRoleDefinitionId
     principalType: 'ServicePrincipal'
   }
+}
+
+resource miexisting 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existing = {
+  name: '${prefix}-mi'
+  scope: rg
 }
 
 module vm 'deploy.vm.bicep' = {
