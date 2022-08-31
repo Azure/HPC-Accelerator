@@ -32,7 +32,7 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: subnet.id
+            id: defaultSubnet.id
           }
           privateIPAllocationMethod: 'Dynamic'
           publicIPAddress: {
@@ -86,21 +86,21 @@ resource nsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
           destinationPortRange: '80'
         }
       }
-      // {
-      //   name: 'default-allow-ssh'
-      //   properties: {
-      //     priority: 1030
-      //     protocol: 'TCP'
-      //     access: 'Allow'
-      //     direction: 'Inbound'
-      //     sourceApplicationSecurityGroups: []
-      //     destinationApplicationSecurityGroups: []
-      //     sourceAddressPrefix: '*'
-      //     sourcePortRange: '*'
-      //     destinationAddressPrefix: '*'
-      //     destinationPortRange: '22'
-      //   }
-      // }
+      {
+        name: 'vnet-allow-ssh'
+        properties: {
+          priority: 1030
+          protocol: 'TCP'
+          access: 'Allow'
+          direction: 'Inbound'
+          sourceApplicationSecurityGroups: []
+          destinationApplicationSecurityGroups: []
+          sourceAddressPrefix: 'VirtualNetwork'
+          sourcePortRange: '*'
+          destinationAddressPrefix: '*'
+          destinationPortRange: '22'
+        }
+      }
     ]
   }
 }
@@ -122,13 +122,24 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
           addressPrefix: '10.8.0.0/24'
         }
       }
+      {
+        name: 'AzureBastionSubnet'
+        properties: {
+          addressPrefix: '10.8.1.0/24'
+        }
+      }
     ]
   }
 }
 
-resource subnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
+resource defaultSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
   parent: vnet
   name: 'default'
+}
+
+resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
+  parent: vnet
+  name: 'AzureBastionSubnet'
 }
 
 resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
@@ -143,6 +154,18 @@ resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
     dnsSettings: {
       domainNameLabel: prefix
     }
+  }
+}
+
+resource pipBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+  name: '${pipName}-bastion'
+  tags: tags
+  location: location
+  sku: {
+    name: 'Standard'
+  }
+  properties: {
+    publicIPAllocationMethod: 'Static'
   }
 }
 
@@ -222,6 +245,30 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
         enabled: true
       }
     }
+  }
+}
+
+resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = {
+  name : '${prefix}-bastion'
+  location: location
+  properties: {
+    enableTunneling: true
+    ipConfigurations: [
+      {
+        name: 'ipconf'
+        properties: {
+          subnet: {
+            id: bastionSubnet.id
+          }
+          publicIPAddress: {
+            id: pipBastion.id
+          }
+        }
+      }
+    ]
+  }
+  sku: {
+    name: 'Standard'
   }
 }
 
