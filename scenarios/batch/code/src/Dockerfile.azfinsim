@@ -1,0 +1,22 @@
+# Dockerfile for AzFinSim Simulator
+FROM ubuntu:18.04
+LABEL Azure Compute
+RUN echo 'AzFinsim Simulator'
+RUN apt-get -y update && apt-get install
+RUN DEBIAN_FRONTEND=noninteractive apt-get install software-properties-common -y
+RUN add-apt-repository ppa:deadsnakes/ppa
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends htop lsof strace python3.9 python3-pip gcc
+RUN DEBIAN_FRONTEND=noninteractive apt-get install -y python3-setuptools
+RUN apt-get clean && rm -rf /var/lib/apt-lists/*
+RUN mkdir /azfinsim
+COPY requirements.txt /azfinsim
+WORKDIR /azfinsim
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements.txt
+COPY azfinsim.py /azfinsim/
+COPY utils.py /azfinsim/
+COPY xmlutils.py /azfinsim/
+COPY montecarlo.py /azfinsim/
+COPY azlog.py /azfinsim/
+COPY getargs.py /azfinsim/
+COPY harvester.py /azfinsim/

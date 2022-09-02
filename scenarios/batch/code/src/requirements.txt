@@ -1,0 +1,12 @@
+setuptools
+wheel
+psutil
+azure.batch
+azure.identity
+azure.common
+azure.keyvault
+applicationinsights
+pandas
+numpy
+scipy
+redis

@@ -1,0 +1,240 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "location": {
+        "type": "String",
+        "defaultValue": "westeurope",
+		"allowedValues": [
+				"westeurope",
+				"eastus",
+				"eastus2",
+				"westus",
+				"centralus"
+			],
+			"metadata": {
+				"description": "The type of replication to use for the Location."
+			}
+      },
+	  "prefix":{
+			"maxLength": 12,
+  			"type": "String"
+	  },
+      "batchScriptFilePath": {
+        "type": "String",
+        "defaultValue": "https://teraweazstorage.blob.core.windows.net/azstorage/initbatch.sh?sp=r&st=2022-07-06T07:59:33Z&se=2040-07-06T15:59:33Z&sv=2021-06-08&sr=b&sig=lXKMsffhSDLos0aO8weCtauj%2BJsaAUyOjg0fTrd2wCM%3D"
+      },
+       "batchScriptFileName": {
+        "type": "String",
+        "defaultValue": "initbatch.sh"
+      },
+      "virtualMachineSize": {
+        "type": "String"
+      },
+      "adminUsername": {
+        "type": "String"
+      },
+      "adminPassword": {
+        "type": "SecureString"
+      }
+    },
+    "variables": {
+		"networkInterfaceName": "[concat(parameters('prefix'), '-ni')]",
+		"networkSecurityGroupName" : "[concat(parameters('prefix'), '-nsg')]",
+      	"nsgId": "[resourceId(resourceGroup().name, 'Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]",
+		"virtualNetworkName": "[concat(parameters('prefix'), '-vnet')]",
+      	"vnetId": "[resourceId(resourceGroup().name,'Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+      	"subnetReference": "[concat(variables('vnetId'), '/subnets/default')]",
+		"publicIpAddressName" : "[concat(parameters('prefix'), '-ip')]",
+		"virtualMachineName" : "[concat(parameters('prefix'), '-vm')]"
+    },
+    "resources": [
+      {
+        "type": "Microsoft.Network/networkInterfaces",
+        "apiVersion": "2021-03-01",
+        "name": "[variables('networkInterfaceName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkSecurityGroups/', variables('networkSecurityGroupName'))]",
+          "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+          "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "subnet": {
+                  "id": "[variables('subnetReference')]"
+                },
+                "privateIPAllocationMethod": "Dynamic",
+                "publicIpAddress": {
+                  "id": "[resourceId(resourceGroup().name, 'Microsoft.Network/publicIpAddresses', variables('publicIpAddressName'))]",
+                  "properties": {
+                    "deleteOption": "Detach"
+                  }
+                }
+              }
+            }
+          ],
+          "networkSecurityGroup": {
+            "id": "[variables('nsgId')]"
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Network/networkSecurityGroups",
+        "apiVersion": "2019-02-01",
+        "name": "[variables('networkSecurityGroupName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "securityRules": [
+              {
+                "name": "default-allow-ssh",
+                "properties": {
+                  "priority": 1030,
+                  "protocol": "TCP",
+                  "access": "Allow",
+                  "direction": "Inbound",
+                  "sourceApplicationSecurityGroups": [],
+                  "destinationApplicationSecurityGroups": [],
+                  "sourceAddressPrefix": "*",
+                  "sourcePortRange": "*",
+                  "destinationAddressPrefix": "*",
+                  "destinationPortRange": "22"
+                }
+              }
+            ]
+        }
+      },
+      {
+        "type": "Microsoft.Network/publicIpAddresses",
+        "apiVersion": "2020-08-01",
+        "name": "[variables('publicIpAddressName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "Standard"
+        },
+        "zones": [
+          "1"
+        ],
+        "properties": {
+          "publicIpAllocationMethod": "Static"
+        }
+      },
+      {
+        "type": "Microsoft.Compute/virtualMachines",
+        "apiVersion": "2021-07-01",
+        "name": "[variables('virtualMachineName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[concat('Microsoft.Network/networkInterfaces/', variables('networkInterfaceName'))]"
+        ],
+        "zones": [
+          "1"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[parameters('virtualMachineSize')]"
+          },
+          "storageProfile": {
+            "osDisk": {
+              "createOption": "fromImage",
+              "managedDisk": {
+                "storageAccountType": "Premium_LRS"
+              },
+              "deleteOption": "Delete"
+            },
+            "imageReference": {
+              "publisher": "canonical",
+              "offer": "0001-com-ubuntu-server-focal",
+              "sku": "20_04-lts-gen2",
+              "version": "latest"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]",
+                "properties": {
+                  "deleteOption": "Detach"
+                }
+              }
+            ]
+          },
+          "osProfile": {
+            "computerName": "[variables('virtualMachineName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]",
+            "linuxConfiguration": {
+              "patchSettings": {
+                "patchMode": "ImageDefault"
+              }
+            }
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": true
+            }
+          }
+        }
+      },
+      {
+        "type": "Microsoft.Network/virtualNetworks",
+        "apiVersion": "2021-08-01",
+        "name": "[variables('virtualNetworkName')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "10.0.0.0/16"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "default",
+              "properties": {
+                "addressPrefix": "10.0.0.0/24"
+              }
+            }
+          ]
+        }
+      },
+      {
+              "name": "batch.custom-script-linux",
+              "apiVersion": "2015-01-01",
+              "type": "Microsoft.Resources/deployments",
+              "properties": {
+                  "mode": "incremental",
+                  "templateLink": {
+                      "uri": "https://catalogartifact.azureedge.net/publicartifacts/microsoft.custom-script-linux-arm-2.0.57/MainTemplate.json"
+                  },
+                  "parameters": {
+                      "fileUris": {
+                          "value": [
+                              "[parameters('batchScriptFilePath')]"
+                          ]
+                      },
+                      "commandToExecute": {
+                          "value": "[concat('sh ', parameters('batchScriptFileName'))]"
+                      },
+                      "vmName": {
+                          "value": "[variables('virtualMachineName')]"
+                      },
+                      "location": {
+                          "value": "[parameters('location')]"
+                      }
+                  }
+              },
+              "dependsOn": [
+                  "[concat('Microsoft.Compute/virtualMachines/', variables('virtualMachineName'))]"
+              ]
+          }
+    ],
+    "outputs": {
+      "adminUsername": {
+        "type": "String",
+        "value": "[parameters('adminUsername')]"
+      }
+    }
+  }
