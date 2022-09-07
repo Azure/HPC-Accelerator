@@ -77,7 +77,7 @@ az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth
 3. Once in the cyclecloud server you need to execute a script that will create a slurm custom cluster template with Nvidia NGC containers:
 ```
 myuser=ccadmin
-mypass=S0meP@ssw0rd
+mypass=S3tu9P@ssw0rd
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/createclustertemp.sh
 chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass
 ```
@@ -86,7 +86,7 @@ chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass
 
 Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
 
-3. Create a Slurm Cluster using the custom template "slurm-ngc":
+4. Create a Slurm Cluster using the custom template "slurm-ngc":
 
 - a.   Go to the azure portal and locate the CycleCloud server public ip. Copy and pasted on the web browser.
 
@@ -103,55 +103,34 @@ Make sure you have completed the project upload succesfully and have a message l
 - f.   Then click the “Save” at the botton right corner and click "start" on the cluster.
 ![Clusters templates.](./images/ui_cc06.png)
 
-4. Configure sshkey, login to Slurm cluster scheduler and run a test job.
+5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
 
-a.   Go back to the ssh terminal and run the following:
-Note. My below my username is ccadmin, if you another username please update the appropriately.
+- a.   Go back to the ssh terminal and run the following:
+Note. My below my username is ccadmin, if you used another username please update commands appropriately.
 
 ```
 scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
-sudo ssh -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/ccadmin/.ssh/id_rsa ccadminkey; sudo chown cyclecloud ccadminkey"
-sudo scp -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler:ccadminkey .ssh/id_rsa
+sudo ssh -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/ccadmin/.ssh/id_rsa ccadminkey; sudo chown cyclecloud ccadminkey"
+sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler:ccadminkey .ssh/id_rsa
 sudo chown ccadmin .ssh/id_rsa
+ls -l .ssh/id_rsa
 ```
+![Slurm test job.](./images/slurmjob01.png)
+- b.   Now ssh to the scheduler node.
+ ```
+scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
+ssh -q -o "StrictHostKeyChecking no" $scheduler
+ ```
 
- b.   Enter a name for your cluster as below:
+- c.   run the following to submit a test slurm job to the HPC partition.
+```
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
+sbatch simpleslurmjob.sh
+```
+![Slurm test job.](./images/slurmjob02.png)
+![Slurm test job.](./images/slurmjob03.png)
 
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image042.png)
-
- c.   Complete the “Required Settings” horizontal tab so it appears as below:
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image044.png)
-
- Note that the NDv4 VMs have been selected.
-
-d.   There’s no need to make any changes to the “Network Attached Storage” tab.
-
-e.   Under “Advanced Settings”, accept the defaults for Slurm and Azure settings. Under “Software”, ensure your deployment appears as below:
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image046.png)
-
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image048.png)
-
- f.    The default settings under the “cloud-init” tab are fine for this setup.
-
-g.   Click on “Save” to persist your configuration.
-
-h.   Click on the left-most horizontal tab that corresponds to your cluster.
-
-i.    Click on the “Start” button to start your cluster. Once active, your cluster will look similar to:
-
-![Graphical user interface, application, Teams  Description automatically generated](./images/clip_image050.png)
-
-j.    Click on the node entry corresponding to the scheduler as below:
-
-![Graphical user interface, application  Description automatically generated](./images/clip_image052.png)
-
- k.   Click on “Connect” in the lower panel to determine the ssh details for the Slurm scheduler as follows:
-
-![Graphical user interface, application  Description automatically generated](./images/clip_image054.png)
-
- l.    Run a health check.
+6.   Run a health check.
 
 a.   Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
 
