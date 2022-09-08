@@ -81,7 +81,7 @@ az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth
 
 3. Once in the cyclecloud server you need to execute a script that will create a slurm custom cluster template with Nvidia NGC containers:
 
-Note: Please replace ccadmin and mypassword with you own credentials use on the bicep deployment.
+Note: Please replace ccadmin and S3tu9P@ssw0rd with you own credentials use on the bicep deployment.
 
 ```
 myuser=ccadmin
