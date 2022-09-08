@@ -57,24 +57,29 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 1. Deploy the environment solution to a location `region=northeurope` and with bicep:
 ```
 region=
+```
+```
 cd scenarios/deeplearning/code/bicep/
 az deployment sub create -l $region --template-file deploy.bicep
 ```
 
-You need to specify: 
+**Note**.You need to specify: 
 - prefix
 - virtualMachineSize (Standard_B2ms)
 - adminUsername
 - adminPassword
+
 ![Bicep deployment](./images/bicep_deployment01.png)
 
 2. After the deployment has been completed you need to login to the CycleCloud VM using Azure Bastion throught ssh.
 
-Note: Please replace ccadmin with you own used on the bicep deployment.
+Note: Please replace jcodespace and ccadmin with you own used on the bicep deployment.
 
 ```
 PREFIX=jcodespace
 myuser=ccadmin
+```
+```
 VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
 az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
@@ -86,6 +91,8 @@ Note: Please replace ccadmin and S3tu9P@ssw0rd with you own credentials use on t
 ```
 myuser=ccadmin
 mypass=S3tu9P@ssw0rd
+```
+```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/createclustertemp.sh
 chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass
 ```
