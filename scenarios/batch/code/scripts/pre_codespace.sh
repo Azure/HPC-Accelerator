@@ -19,8 +19,10 @@ sudo apt-get -y install docker-ce docker-ce-cli containerd.io
 sudo usermod -aG docker $(whoami)
 
 sudo apt-get install -y jq redis-tools python3-pip
-sudo pip3 install -r ../src/requirements.txt
+sudo pip3 install -r scenarios/batch/code/src/requirements.txt
 
 terraform -v
 az version
 docker version
+
+az vm image terms accept --urn microsoft-azure-batch:ubuntu-server-container:20-04-lts:latest
