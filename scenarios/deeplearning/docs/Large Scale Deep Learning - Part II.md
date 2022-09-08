@@ -78,6 +78,7 @@ myuser=ccadmin
 VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
 az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
+
 3. Once in the cyclecloud server you need to execute a script that will create a slurm custom cluster template with Nvidia NGC containers:
 
 Note: Please replace ccadmin and mypassword with you own credentials use on the bicep deployment.
@@ -95,37 +96,37 @@ Make sure you have completed the project upload succesfully and have a message l
 
 4. Create a Slurm Cluster using the custom template "slurm-ngc":
 
-- a.   Go to the azure portal and locate the CycleCloud server DNS name. Copy and pasted on the web browser.
+  - a.Go to the azure portal and locate the CycleCloud server DNS name. Copy and pasted on the web browser.
 
-- b.   Log in to Azure CycleCloud via the web-based GUI.
+  - b.Log in to Azure CycleCloud via the web-based GUI.
 
 ![Put your username and password.](./images/ui_cc01.png)
 
-- c.   Click on the "slurm-ngc" icon.
+  - c.Click on the "slurm-ngc" icon.
 
 ![Clusters templates.](./images/ui_cc02.png)
 
-- d.   Next entered the name you want for the cluster.
+  - d.Next entered the name you want for the cluster.
 
 ![Clusters templates.](./images/ui_cc03.png)
 
-- e.   Click on the “Required Settings” horizontal tab. 
+  - e.Click on the “Required Settings” horizontal tab. 
 
 Note.Change the Scheduler VM Type and HPC VM Type if the VM selected are not available for you.
 
 ![Clusters templates.](./images/ui_cc04.png)
 
-- f.   Click on the “Advanced Settings” horizontal tab. Under the software section, click the check box for "Custom image" for each OS Nodes(Scheduler, HPC, HTC) change the custom image to `microsoft-dsvm:ubuntu-hpc:1804:latest`. Then go to the Advanced Networking section and uncheck "Return Proxy" and "Public Head Node". Below is a reference picture.
+  - f.Click on the “Advanced Settings” horizontal tab. Under the software section, click the check box for "Custom image" for each OS Nodes(Scheduler, HPC, HTC) change the custom image to `microsoft-dsvm:ubuntu-hpc:1804:latest`. Then go to the Advanced Networking section and uncheck "Return Proxy" and "Public Head Node". Below is a reference picture.
 
 ![Clusters templates.](./images/ui_cc05.png)
 
-- f.   Then click the “Save” at the botton right corner and click "start" on the cluster.
+  - g.Then click the “Save” at the botton right corner and click "start" on the cluster.
 
 ![Clusters templates.](./images/ui_cc06.png)
 
 5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
 
-- a.   Go back to the ssh terminal and run the following:
+  - a.Go back to the ssh terminal and run the following:
 
 Note. My below my username is ccadmin, if you used another username please update commands appropriately.
 
@@ -139,14 +140,14 @@ ls -l .ssh/id_rsa
 
 ![Slurm test job.](./images/slurmjob01.png)
 
-- b.   Now ssh to the scheduler node.
+  - b.Now ssh to the scheduler node.
 
  ```
 scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
 ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
-- c.   Run the following to submit a test slurm job to the HPC partition.
+  - c.Run the following to submit a test slurm job to the HPC partition.
 
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
@@ -157,9 +158,9 @@ sbatch simpleslurmjob.sh
 
 ![Slurm test job.](./images/slurmjob03.png)
 
-6.   Run a health check.
+6. Run a health check.
 
-a.   Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
+- a.Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
 
 ```bash
 m.  sbatch -N 4 ./nccl.slrm
