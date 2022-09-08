@@ -8,13 +8,35 @@ Large Scale Deep Learning Module: Part 2
 
  Refer to the presentation for:
 
-·    Knowledge, skills, and experiential objectives
-
-·    Prerequisites
+·    Knowledge, skills and objectives
 
 ·    An introduction to the NDv4 VM on Azure
 
  The exercises here comprise the second part of this module; you are expected to have completed the Part 1 exercise first.
+
+ # Prerequisites
+
+This lab will leverage Codespaces to perform the module. To learn more about Codespaces, go to [GitHub Codespaces Documentation - GitHub Docs](https://docs.github.com/en/codespaces).
+
+**Note:** If you cannot use Codespaces, you can use WSL2 with the following tools installed: [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli), [Bicep Tools](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
+
+## Running the Labs in Github Codespace
+
+- Go to the GitHub repository for this Lab: [HPC-Accelerator](https://github.com/Azure/HPC-Accelerator)
+- Click the `Code` button on this repo
+  - Select `Codespaces` tab
+
+![Create Codespace](./images/0-CodespacesTab.png)  
+  - If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
+
+![Create Codespace](./images/0-OpenWithCodespaces.jpg)
+- Click `New codespace`
+- Choose the `2 core` option
+- Install azure cli `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash` 
+- Log in to Azure from a bash or zsh terminal via: `az login --use-device-code`
+- Add require additional extension `az extension add --name ssh`
+- Accept the terms for CycleCloud Marketplace image `az vm image terms accept --urn azurecyclecloud:azure-cyclecloud:cyclecloud8:latest`
+- Proceed to overview 
 
 # Overview
 
@@ -30,159 +52,115 @@ Large Scale Deep Learning Module: Part 2
 
  The following steps have been identified for this procedure.
 
- An application ID is required for each instance of Azure CycleCloud. After registering an application for this purpose, Contributor access is assigned to the same. The detailed steps follow below.
+ Azure CycleCloud installation will use an User Managed Identity with Contributor access.
 
-1. Create a new application registration similar to the following:
+1. Deploy the environment solution to a location `region=northeurope` and with bicep:
+```
+region=
+cd scenarios/deeplearning/code/bicep/
+az deployment sub create -l $region --template-file deploy.bicep
+```
 
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image004.png)
+You need to specify: 
+- prefix
+- virtualMachineSize (Standard_B2ms)
+- adminUsername
+- adminPassword
+![Bicep deployment](./images/bicep_deployment01.png)
 
-2. After registering the application, the corresponding overview screen should appear as shown below:
+2. After the deployment has been completed you need to login to the CycleCloud VM using Azure Bastion throught ssh.
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image006.png)
+Note: Please replace ccadmin with you own used on the bicep deployment.
 
-From the overview screen of the newly registered application, copy the “Application (client) ID” and the “Directory (tenant) ID” to a temporary document for future use.
+```
+PREFIX=jcodespace
+myuser=ccadmin
+VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
+az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
+```
 
-3. To assign “Contributor” access to this newly created application (namely “dlatlarge” in this case), follow these steps:
+3. Once in the cyclecloud server you need to execute a script that will create a slurm custom cluster template with Nvidia NGC containers:
 
-a.   Select the subscription that Azure CycleCloud will make use of, and select the “Access control (IAM)” entry as shown below:
+Note: Please replace ccadmin and S3tu9P@ssw0rd with you own credentials use on the bicep deployment.
 
-![Graphical user interface, application  Description automatically generated](./images/clip_image008.png)
+```
+myuser=ccadmin
+mypass=S3tu9P@ssw0rd
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/createclustertemp.sh
+chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass
+```
 
-b.   By selecting “Add role assignment” on the previous, you will arrive at the screen below:
+![Upload completed](./images/upload_completed.png)
 
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image010.png)
+Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
 
- Select “Contributor” as the role to be assigned.
+4. Create a Slurm Cluster using the custom template "slurm-ngc":
 
- c.   Next, add members to this new role assignment as follows – explicitly “dlatlarge” – as follows:
+  - a.Go to the azure portal and locate the CycleCloud server DNS name. Copy and pasted on the web browser.
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image012.png)
+  - b.Log in to Azure CycleCloud via the web-based GUI.
 
-As shown below, “dlatlarge” has been targeted as a member that has “Contributor” access to this subscription:
+![Put your username and password.](./images/ui_cc01.png)
 
-![Graphical user interface, application  Description automatically generated](./images/clip_image014.png)
+  - c.Click on the "slurm-ngc" icon.
 
-Note that “Review + assign” is required to enact this role assignment; this is illustrated below:
+![Clusters templates.](./images/ui_cc02.png)
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image016.png)
+  - d.Next entered the name you want for the cluster.
 
-d.   Verify that the application (“datlarge”) has been successfully granted “Contributor” access by locating it in the “Access control (IAM)” view of the subscription ("Microsoft Azure” in this case).
+![Clusters templates.](./images/ui_cc03.png)
 
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image018.png)
+  - e.Click on the “Required Settings” horizontal tab. 
 
-4. Return to the application registration view for the application of interest – here “dtatlarge” as shown below:
+Note.Change the Scheduler VM Type and HPC VM Type if the VM selected are not available for you.
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image020.png)
+![Clusters templates.](./images/ui_cc04.png)
 
-5. From this view, click on “Add a certificate or secret” in the upper-right area to arrive at the view below. Note that in the view below, a “New client secret” was added.
+  - f.Click on the “Advanced Settings” horizontal tab. Under the software section, click the check box for "Custom image" for each OS Nodes(Scheduler, HPC, HTC) change the custom image to `microsoft-dsvm:ubuntu-hpc:1804:latest`. Then go to the Advanced Networking section and uncheck "Return Proxy" and "Public Head Node". Below is a reference picture.
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image022.png)
+![Clusters templates.](./images/ui_cc05.png)
 
-Copy and paste the value of the new client secret (“dtatlarge test” in this case) to temporary storage, as it will be needed shortly.
+  - g.Then click the “Save” at the botton right corner and click "start" on the cluster.
 
-6. Create an Azure CycleCloud deployment.
+![Clusters templates.](./images/ui_cc06.png)
 
- a.   Click on the ARM template [here](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fnandakumar-terawe%2FAzureCycleCloudArmTemplate%2Fmain%2FarmTemplate.json). Note that this link will open the **custom template** illustrated below in the Azure portal:
+5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
 
-![Graphical user interface, application  Description automatically generated](./images/clip_image024.png)
+  - a.Go back to the ssh terminal and run the following:
 
-![Graphical user interface, application  Description automatically generated](./images/clip_image026.png)
+Note. My below my username is ccadmin, if you used another username please update commands appropriately.
 
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image028.png)
+```
+scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
+sudo ssh -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/ccadmin/.ssh/id_rsa ccadminkey; sudo chown cyclecloud ccadminkey"
+sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler:ccadminkey .ssh/id_rsa
+sudo chown ccadmin .ssh/id_rsa
+ls -l .ssh/id_rsa
+```
 
- The purpose of this template is to ease the creation of an Azure CycleCloud deployment.
+![Slurm test job.](./images/slurmjob01.png)
 
- The template is maintained via a GitHub repo [here](https://github.com/nandakumar-terawe/AzureCycleCloudArmTemplate) as follows:
+  - b.Now ssh to the scheduler node.
 
- ![A screenshot of a computer  Description automatically generated](./images/clip_image030.png)
+ ```
+scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
+ssh -q -o "StrictHostKeyChecking no" $scheduler
+ ```
 
-b.   Minimally, insert into the template your values for the tenant and application IDs, as well as the application secret. (These are the three items you were encouraged to place into temporary storage – e.g., a buffer in an editor such as Notepad).
+  - c.Run the following to submit a test slurm job to the HPC partition.
 
-c.   Enter and make note of your password.
+```
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
+sbatch simpleslurmjob.sh
+```
 
- A complete deployment will appear as below:
+![Slurm test job.](./images/slurmjob02.png)
 
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image032.png)
+![Slurm test job.](./images/slurmjob03.png)
 
-7. Finalize the deployment of Azure CycleCloud.
+6. Run a health check.
 
-a.   From the completed-deployment screen, select “Outputs” from the top-left area. You will see output similar to that below:
-
-![Application  Description automatically generated with medium confidence](./images/clip_image034.png)
-
-b.   Copy the execute script to temporary storage for later use.
-
-c.   Return to the completed-deployment view, and select the URL corresponding to the deployed VM. This is the VM onto which Azure CycleCloud has been deployed. Obtain the IP address for this VM and ssh into it (see below).
-
-d.   The “executeScript” copied to temporary storage needs to be pasted into the shell session (on the Azure CycleCloud VM) as shown below:
-
- ![Text  Description automatically generated](./images/clip_image036.png)
-
- By executing this script, the configuration Azure CycleCloud has been completed.
-
-8. Launch Azure CycleCloud.
-
-a.   The IP address used to complete the configuration of Azure CycleCloud via an ssh session can also be used to access the web server running on this same VM. Point your web browser at https://<public IP address of the Azure CycleCloud node>.
-
-b.   Log in to Azure CycleCloud via the web-based GUI.
-
-c.   At the very bottom of the page presented, click on the gear icon.
-
-d.   Next click on the subscription entered into the software.
-
-e.   By clicking on edit, you can ensure that the details captured via the ARM template have been ingested into Azure CycleCloud as shown below:
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image038.png)
-
-f.    From the edit subscription screen, perform a sanity check by clicking on “Validate Credentials”. At this point, Azure CycleCloud has been configured for use.
-
-9. Configure a Slurm cluster in Azure CycleCloud.
-
-a.   From the Azure CycleCloud GUI, click on the plus sign “+” (bottom left) to add a new cluster. From this screen, click on the “Slurm” icon to add a new cluster based on this workload manager.
-
-
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image040.png)
-
- b.   Enter a name for your cluster as below:
-
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image042.png)
-
- c.   Complete the “Required Settings” horizontal tab so it appears as below:
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image044.png)
-
- Note that the NDv4 VMs have been selected.
-
-d.   There’s no need to make any changes to the “Network Attached Storage” tab.
-
-e.   Under “Advanced Settings”, accept the defaults for Slurm and Azure settings. Under “Software”, ensure your deployment appears as below:
-
-![Graphical user interface, text, application, email  Description automatically generated](./images/clip_image046.png)
-
-![Graphical user interface, text, application  Description automatically generated](./images/clip_image048.png)
-
- f.    The default settings under the “cloud-init” tab are fine for this setup.
-
-g.   Click on “Save” to persist your configuration.
-
-h.   Click on the left-most horizontal tab that corresponds to your cluster.
-
-i.    Click on the “Start” button to start your cluster. Once active, your cluster will look similar to:
-
-![Graphical user interface, application, Teams  Description automatically generated](./images/clip_image050.png)
-
-j.    Click on the node entry corresponding to the scheduler as below:
-
-![Graphical user interface, application  Description automatically generated](./images/clip_image052.png)
-
- k.   Click on “Connect” in the lower panel to determine the ssh details for the Slurm scheduler as follows:
-
-![Graphical user interface, application  Description automatically generated](./images/clip_image054.png)
-
- l.    Run a health check.
-
-a.   Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
+- a.Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
 
 ```bash
 m.  sbatch -N 4 ./nccl.slrm
