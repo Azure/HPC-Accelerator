@@ -54,9 +54,9 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 
  Azure CycleCloud installation will use an User Managed Identity with Contributor access.
 
-1. Deploy the environment solution to a location `region=northeurope` and with bicep:
+1. Deploy the environment solution to a location `westeurope, southcentralus, eastus, eastus2, westus2` and with bicep:
 ```
-region=
+region=southcentralus
 ```
 ```
 cd scenarios/deeplearning/code/bicep/
@@ -65,7 +65,7 @@ az deployment sub create -l $region --template-file deploy.bicep
 
 **Note**.You need to specify: 
 - prefix
-- virtualMachineSize (Standard_B2ms)
+- virtualMachineSize (Standard_D2s_v4)
 - adminUsername
 - adminPassword
 
@@ -76,7 +76,7 @@ az deployment sub create -l $region --template-file deploy.bicep
 Note: Please replace jcodespace and ccadmin with you own used on the bicep deployment.
 
 ```
-PREFIX=jcodespace
+PREFIX=codespace01
 myuser=ccadmin
 ```
 ```
@@ -91,10 +91,12 @@ Note: Please replace ccadmin and S3tu9P@ssw0rd with you own credentials use on t
 ```
 myuser=ccadmin
 mypass=S3tu9P@ssw0rd
+PREFIX=codespace01
+region=southcentralus
 ```
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/createclustertemp.sh
-chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass
+chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $PREFIX $region
 ```
 
 ![Upload completed](./images/upload_completed.png)
@@ -109,25 +111,7 @@ Make sure you have completed the project upload succesfully and have a message l
 
 ![Put your username and password.](./images/ui_cc01.png)
 
-  - c.Click on the "slurm-ngc" icon.
-
-![Clusters templates.](./images/ui_cc02.png)
-
-  - d.Next entered the name you want for the cluster.
-
-![Clusters templates.](./images/ui_cc03.png)
-
-  - e.Click on the “Required Settings” horizontal tab. 
-
-Note.Change the Scheduler VM Type and HPC VM Type if the VM selected are not available for you.
-
-![Clusters templates.](./images/ui_cc04.png)
-
-  - f.Click on the “Advanced Settings” horizontal tab. Under the software section, click the check box for "Custom image" for each OS Nodes(Scheduler, HPC, HTC) change the custom image to `microsoft-dsvm:ubuntu-hpc:1804:latest`. Then go to the Advanced Networking section and uncheck "Return Proxy" and "Public Head Node". Below is a reference picture.
-
-![Clusters templates.](./images/ui_cc05.png)
-
-  - g.Then click the “Save” at the botton right corner and click "start" on the cluster.
+  - c.Then click "start" on the cluster.
 
 ![Clusters templates.](./images/ui_cc06.png)
 
@@ -154,7 +138,11 @@ scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{prin
 ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
-  - c.Run the following to submit a test slurm job to the HPC partition.
+  - c.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
+
+```
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+```
 
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
@@ -165,69 +153,18 @@ sbatch simpleslurmjob.sh
 
 ![Slurm test job.](./images/slurmjob03.png)
 
-6. Run a health check.
+6. Run a nccl check.
 
-- a.Ssh into the scheduler node. Copy the script below into a file called “nccl.slrm”. Then execute the job via Slurm as follows:
+- a.Run a script for testing nccl. Then execute the job via Slurm as follows:
 
-```bash
-m.  sbatch -N 4 ./nccl.slrm
 ```
+wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
 
- **#!/bin/bash**
+chmod +x run_nccl_tests_slurm_enroot.slrm
 
-\#SBATCH -t 00:20:00
+sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
 
-\#SBATCH --ntasks-per-node=8
-
-\#SBATCH --gpus-per-node=8
-
-\#SBATCH -o logs/%x_%j.log
-
-export UCX_IB_PCI_RELAXED_ORDERING=on \
-
-​    UCX_TLS=tcp \
-
-​    NCCL_DEBUG=INFO \
-
-​    CUDA_DEVICE_ORDER=PCI_BUS_ID \
-
-​    NCCL_IB_PCI_RELAXED_ORDERING=1 \
-
-​    NCCL_SOCKET_IFNAME=eth0 \
-
-​    UCX_NET_DEVICES=eth0 \
-
-​    NCCL_TOPO_FILE=/workspace/nccl/nccl-topology.txt
-
-CONT="nvcr.io#nvidia/pytorch:21.05-py3"
-
-MOUNT="/nfs2/nccl:/workspace/nccl_284,/nfs2/hpcx-v2.8.1-gcc-MLNX_OFED_LINUX-5.1-0.6.6.0-ubuntu18.04-x86_64:/opt/hpcx,/nfs2/nccl_2.10.3-1/nccl:/workspace/nccl"
-
- export OMPI_MCA_pml=ucx
-
-export OMPI_MCA_btl=^openib
-
-export OMPI_MCA_COLL_HCOLL_ENABLE=0
-
-srun --ntasks=$SLURM_JOB_NUM_NODES --container-image "${CONT}" \
-
-  --container-name=nccl \
-
-  --container-mounts="${MOUNT}" \
-
-  --ntasks-per-node=1 \
-
-  bash -c "apt update && apt-get install -y infiniband-diags"
-
- srun --gpus-per-node=8 \
-
-  --ntasks-per-node=8 \
-
-  --container-name=nccl \
-
-  --container-mounts "${MOUNT}" \
-
-  bash -c 'export LD_LIBRARY_PATH=/opt/hpcx/nccl_rdma_sharp_plugin/lib:/opt/hpcx/sharp/lib:/workspace/nccl/build/lib:$LD_LIBRARY_PATH && /workspace/nccl/nccl-tests/build/alltoall_perf -b8 -f2 -g1 -e 8G'
+```
 
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
 
