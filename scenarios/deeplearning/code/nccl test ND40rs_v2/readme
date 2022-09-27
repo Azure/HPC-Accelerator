@@ -1,0 +1,37 @@
+# Run NCCL tests optimally on ND40rs_v2 (A100) 
+
+Contains a few scripts demonstrating how to run the NCCL performance tests (e.g all-reduce, all-to-all, etc) optimally
+on ND40rs_v2 (A100) running Ubuntu-hpc 18.04 marketplace image. Examples of how to run this benchmark using the SLURM scheduler,
+ SLURM+pyxis+enroot (pytroch container) and without the SLURM scheduler (e.g with a hostfile) are provided. The default NCCL test in all scripts is NCCL all-reduce.
+
+>Note: You can change the NCCL test by setting the variable NCCL_TESTS_EXE to a different executable (default is all_reduce_perf)
+ 
+## Prerequisites
+
+- Ubuntu-hpc 18.04, SLURM 20.11.7-1 (Tested with Cyclecloud 8.2.2)
+- Compute node(s), ND40sr_v2 (Running Ubuntu-hpc 18.04)
+
+## Run NCCL test using MPI and hostfile (No Scheduler)
+
+First, log-on to Compute node (Needs to have MPI environment)
+```
+./run_nccl_tests.sh <NUMBER_OF_MPI_PROCESSES>
+```
+>Note: Each NDv2 should have 8 MPI processes (so on 2 NDv2, NUM_OF_MPI_PROCESSES=5), the HOSTFILE is a text hostfile, each line has 1 IP address)
+
+## Run NCCL test using the SLURM scheduler (e.g sbatch/srun)
+
+Run from the scheduler or login-node.
+```
+sbatch -N <NUMBER_OF_NDV2_NODES> ./run_nccl_tests_slurm.slrm
+```
+
+## Run NCCL test in a pytorch container using the SLURM scheduler (e.g sbatch/srun) with pyxis+enroot
+
+Run from the scheduler or login-node.
+```
+sbatch -N <NUMBER_OF_NDV2_NODES> ./run_nccl_tests_slurm_enroot.slrm
+```
+>Note: This example uses the Nvidia pytorch container version 21.10, you can choose to use a different pytorch container.
+
+## Expected NCCL Collective Performance on NDv2
