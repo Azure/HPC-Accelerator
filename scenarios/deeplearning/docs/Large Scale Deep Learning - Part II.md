@@ -1,6 +1,6 @@
 # HPC Skilling Hands-On Exercises
 
-Large Scale Deep Learning Module: Part 2
+Large Scale Deep Learning Hands On Lab for NDv4 VM Series
 
 # Intended Use
 
@@ -11,8 +11,6 @@ Large Scale Deep Learning Module: Part 2
 ·    Knowledge, skills and objectives
 
 ·    An introduction to the NDv4 VM on Azure
-
- The exercises here comprise the second part of this module; you are expected to have completed the Part 1 exercise first.
 
  # Prerequisites
 
@@ -27,11 +25,15 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
   - Select `Codespaces` tab
 
 ![Create Codespace](./images/0-CodespacesTab.png)  
-  - If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
 
-![Create Codespace](./images/0-OpenWithCodespaces.jpg)
 - Click `New codespace`
 - Choose the `2 core` option
+![Create Codespace](./images/create-codespace.png)
+
+- If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
+
+![Create Codespace](./images/0-OpenWithCodespaces.jpg)
+
 - Install azure cli `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash` 
 - Log in to Azure from a bash or zsh terminal via: `az login --use-device-code`
 - Add require additional extension `az extension add --name ssh`
@@ -169,6 +171,8 @@ sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
 
  For additional details, consult the performance considerations blog post [here](https://techcommunity.microsoft.com/t5/azure-global/performance-considerations-for-large-scale-deep-learning/ba-p/2693834).**
+For futher detatils on Production deployment please review blog post [here]
+https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003
 
 **Optional: Cleanup**
 
