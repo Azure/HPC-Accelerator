@@ -25,3 +25,4 @@ sed -i "s/myregion/$4/g" slurmcycle.json
 cyclecloud import_cluster -f slurm_cycle.txt -p slurmcycle.json -c Ndv4Slurm -t
 sleep 2
 cyclecloud create_cluster Ndv4Slurm deeplearning -p slurmcycle.json
+echo "CycleCloud UI IP:"; ip route get 8.8.8.8 | grep -oP 'src \K[^ ]+'
