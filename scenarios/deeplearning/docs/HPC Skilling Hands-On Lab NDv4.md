@@ -26,8 +26,9 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 
 ![Create Codespace](./images/0-CodespacesTab.png)  
 
-- Click `New codespace`
+- Click `Create codespace`
 - Choose the `2 core` option
+
 ![Create Codespace](./images/create-codespace.png)
 
 - If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
