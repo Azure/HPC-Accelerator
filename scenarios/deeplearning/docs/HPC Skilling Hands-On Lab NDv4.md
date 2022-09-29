@@ -149,7 +149,7 @@ ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
 ```
-wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/simpleslurmjob.sh
 sbatch simpleslurmjob.sh
 ```
 
