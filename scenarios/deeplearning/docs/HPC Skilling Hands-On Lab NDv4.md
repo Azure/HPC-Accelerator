@@ -83,7 +83,7 @@ PREFIX=codespace01
 myuser=ccadmin
 ```
 ```
-VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
+VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm-cc --query id -o tsv)
 az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
 
