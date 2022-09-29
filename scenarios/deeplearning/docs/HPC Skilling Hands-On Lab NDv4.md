@@ -83,7 +83,11 @@ PREFIX=codespace01
 myuser=ccadmin
 ```
 ```
+<<<<<<< HEAD:scenarios/deeplearning/docs/HPC Skilling Hands-On Lab NDv4.md
 VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm-cc --query id -o tsv)
+=======
+VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
+>>>>>>> main:scenarios/deeplearning/docs/Large Scale Deep Learning - Part II.md
 az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
 
@@ -118,8 +122,12 @@ Make sure you have completed the project upload succesfully and have a message l
 
 ![Put your username and password.](./images/ui_cc01.png)
 
+<<<<<<< HEAD:scenarios/deeplearning/docs/HPC Skilling Hands-On Lab NDv4.md
 
   - e.Then click "start" on the cluster.
+=======
+  - c.Then click "start" on the cluster.
+>>>>>>> main:scenarios/deeplearning/docs/Large Scale Deep Learning - Part II.md
 
 ![Clusters templates.](./images/ui_cc06.png)
 
@@ -148,6 +156,15 @@ scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{prin
 ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
+<<<<<<< HEAD:scenarios/deeplearning/docs/HPC Skilling Hands-On Lab NDv4.md
+=======
+  - c.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
+
+```
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+```
+
+>>>>>>> main:scenarios/deeplearning/docs/Large Scale Deep Learning - Part II.md
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
 sbatch simpleslurmjob.sh
@@ -159,12 +176,19 @@ sbatch simpleslurmjob.sh
 
 6. Run a nccl check.
 
+<<<<<<< HEAD:scenarios/deeplearning/docs/HPC Skilling Hands-On Lab NDv4.md
   - a.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
 
 ```
 sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
-```
+=======
+- a.Run a script for testing nccl. Then execute the job via Slurm as follows:
 
+>>>>>>> main:scenarios/deeplearning/docs/Large Scale Deep Learning - Part II.md
+```
+wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
+
+<<<<<<< HEAD:scenarios/deeplearning/docs/HPC Skilling Hands-On Lab NDv4.md
 - b.Run a script for testing nccl. Then execute the job via Slurm as follows:
 
 ```
@@ -174,6 +198,12 @@ chmod +x run_nccl_tests_slurm_enroot.slrm
 
 sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
 
+=======
+chmod +x run_nccl_tests_slurm_enroot.slrm
+
+sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
+
+>>>>>>> main:scenarios/deeplearning/docs/Large Scale Deep Learning - Part II.md
 ```
 
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
