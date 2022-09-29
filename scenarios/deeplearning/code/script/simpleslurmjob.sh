@@ -3,7 +3,6 @@
 #SBATCH --job-name=test
 #
 #SBATCH --get-user-env
-#SBATCH --partition=hpc
 #SBATCH --time=5:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
