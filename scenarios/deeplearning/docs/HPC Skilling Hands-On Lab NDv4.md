@@ -102,7 +102,7 @@ wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deep
 chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $PREFIX $region
 ```
 
-![Upload completed](./images/upload_completed.png)
+![Upload completed](./images/cc-cluster-template.png)
 
 Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
 
