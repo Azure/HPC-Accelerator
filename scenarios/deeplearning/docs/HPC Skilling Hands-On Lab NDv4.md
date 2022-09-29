@@ -106,17 +106,24 @@ chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $PREFIX 
 
 Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
 
-4. Create a Slurm Cluster using the custom template "slurm-ngc":
+4. Start the Slurm Cluster deeplearning:
 
-  - a.Go to the azure portal and locate the CycleCloud server DNS name. Copy and pasted on the web browser.
+  - a.Go to the azure portal and locate the Windows Jumpbox. The VM name will have the following name "prefix"-vm-jb. 
+ 
+  - b.Next Connect to the VM using the Bastion mode. Using the username and passoword you already gave on the deployment process. 
 
-  - b.Log in to Azure CycleCloud via the web-based GUI.
+  - c.Using Bastion RDP session open the browser on the remote VM and put the of the "CycleCloud UI IP" that came up in the terminal. 
+ 
+  - d.Log in to Azure CycleCloud using the same credentials on the web GUI.
 
 ![Put your username and password.](./images/ui_cc01.png)
 
-  - c.Then click "start" on the cluster.
+
+  - e.Then click "start" on the cluster.
 
 ![Clusters templates.](./images/ui_cc06.png)
+
+### Note. If you don't have access to ND A100 v4 Series (Standard_ND96amsr_A100_v4 or Standard_ND96asr_A100_v4) you would only be able to do succesfully up to step 5. If you have access to NDv2 please jump to step 7.   
 
 5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
 
@@ -141,12 +148,6 @@ scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{prin
 ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
-  - c.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
-
-```
-sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
-```
-
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
 sbatch simpleslurmjob.sh
@@ -158,7 +159,13 @@ sbatch simpleslurmjob.sh
 
 6. Run a nccl check.
 
-- a.Run a script for testing nccl. Then execute the job via Slurm as follows:
+  - a.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
+
+```
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+```
+
+- b.Run a script for testing nccl. Then execute the job via Slurm as follows:
 
 ```
 wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
