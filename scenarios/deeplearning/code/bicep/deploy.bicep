@@ -31,7 +31,7 @@ param azureSovereignCloud string = 'public'
 
 @maxLength(12)
 param prefix string
-param virtualMachineSize string
+param virtualMachineSize string = 'Standard_D2s_v4'
 param adminUsername string
 
 @secure()
@@ -84,5 +84,3 @@ module vm 'deploy.vm.bicep' = {
   }
   dependsOn: [ra]
 }
-
-output fqdn string = vm.outputs.fqdn
