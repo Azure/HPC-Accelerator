@@ -30,6 +30,7 @@ param tenantId string = tenant().tenantId
 param azureSovereignCloud string = 'public'
 
 @maxLength(5)
+@description('Prefix to use for resources, must be maximum of 5 characters')
 param prefix string
 param virtualMachineSize string = 'Standard_D2s_v4'
 param adminUsername string = 'ccadmin'
