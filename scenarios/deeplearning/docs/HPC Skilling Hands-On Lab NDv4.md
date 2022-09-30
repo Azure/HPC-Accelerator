@@ -68,8 +68,6 @@ az deployment sub create -l $region --template-file deploy.bicep
 
 **Note**.You need to specify: 
 - prefix
-- virtualMachineSize (Standard_D2s_v4)
-- adminUsername
 - adminPassword
 
 ![Bicep deployment](./images/bicep_deployment01.png)
@@ -79,7 +77,7 @@ az deployment sub create -l $region --template-file deploy.bicep
 Note: Please replace jcodespace and ccadmin with you own used on the bicep deployment.
 
 ```
-PREFIX=codespace01
+PREFIX=cs01
 myuser=ccadmin
 ```
 ```
@@ -94,7 +92,7 @@ Note: Please replace ccadmin and S3tu9P@ssw0rd with you own credentials use on t
 ```
 myuser=ccadmin
 mypass=S3tu9P@ssw0rd
-PREFIX=codespace01
+PREFIX=cs01
 region=southcentralus
 ```
 ```
