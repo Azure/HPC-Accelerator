@@ -206,7 +206,8 @@ https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-producti
 ```
 sudo /opt/cycle/slurm/cyclecloud_slurm.sh scale
 ```
-    You should see a message like the picture below.
+    
+  **You should see a message like the picture below.**
 ![Slurm Ndv4 job.](./images/edit-cmdmsg.png)
 
   - e. Now you are ready to run nccl test. Run the cmds bellow to download the job script and submit the slurm pyxis job.  
