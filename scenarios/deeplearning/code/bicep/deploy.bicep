@@ -29,10 +29,11 @@ param tenantId string = tenant().tenantId
 ])
 param azureSovereignCloud string = 'public'
 
-@maxLength(12)
+@maxLength(5)
+@description('Prefix to use for resources, must be maximum of 5 characters')
 param prefix string
-param virtualMachineSize string
-param adminUsername string
+param virtualMachineSize string = 'Standard_D2s_v4'
+param adminUsername string = 'ccadmin'
 
 @secure()
 param adminPassword string
@@ -84,5 +85,3 @@ module vm 'deploy.vm.bicep' = {
   }
   dependsOn: [ra]
 }
-
-output fqdn string = vm.outputs.fqdn

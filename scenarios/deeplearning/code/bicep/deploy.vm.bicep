@@ -35,12 +35,6 @@ resource ccNic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
             id: ccSubnet.id
           }
           privateIPAllocationMethod: 'Dynamic'
-          publicIPAddress: {
-            id: pip.id
-            properties: {
-              deleteOption: 'Detach'
-            }
-          }
         }
       }
     ]
@@ -51,7 +45,7 @@ resource ccNic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
 }
 
 resource jumpBoxNic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
-  name: '${nicName}-jumpbox'
+  name: '${nicName}-jb'
   tags: tags
   location: location
   properties: {
@@ -78,38 +72,7 @@ resource jumpBoxNsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
   tags: tags
   location: location
   properties: {
-    securityRules: [
-      {
-        name: 'RDP-TCP'
-        properties: {
-          priority: 1010
-          protocol: 'Tcp'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '3389'
-        }
-      }
-      {
-        name: 'RDP-UDP'
-        properties: {
-          priority: 1020
-          protocol: 'Udp'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '3389'
-        }
-      }
-    ]
+    securityRules: []
   }
 }
 
@@ -118,53 +81,7 @@ resource ccNsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
   tags: tags
   location: location
   properties: {
-    securityRules: [
-      {
-        name: 'HTTPS'
-        properties: {
-          priority: 1010
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'HTTP'
-        properties: {
-          priority: 1020
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '80'
-        }
-      }
-      {
-        name: 'vnet-allow-ssh'
-        properties: {
-          priority: 1030
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: 'VirtualNetwork'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '22'
-        }
-      }
-    ]
+    securityRules: []
   }
 }
 
@@ -222,20 +139,20 @@ resource jumpBoxSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' ex
   name: 'jumpbox'
 }
 
-resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
-  name: pipName
-  tags: tags
-  location: location
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    dnsSettings: {
-      domainNameLabel: prefix
-    }
-  }
-}
+// resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+//   name: pipName
+//   tags: tags
+//   location: location
+//   sku: {
+//     name: 'Standard'
+//   }
+//   properties: {
+//     publicIPAllocationMethod: 'Static'
+//     dnsSettings: {
+//       domainNameLabel: prefix
+//     }
+//   }
+// }
 
 resource pipBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   name: '${pipName}-bastion'
@@ -310,7 +227,7 @@ resource ccVm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       ]
     }
     osProfile: {
-      computerName: vmName
+      computerName: '${vmName}-cc'
       adminUsername: adminUsername
       adminPassword: adminPassword
       linuxConfiguration: {
@@ -363,7 +280,7 @@ resource jumpBoxVm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       ]
     }
     osProfile: {
-      computerName: vmName
+      computerName: substring('${vmName}-jb', 0, 15)
       adminUsername: adminUsername
       adminPassword: adminPassword
     }
@@ -410,10 +327,8 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep ${secondsToWaitBeforeCustomScriptExec}; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep ${secondsToWaitBeforeCustomScriptExec}; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${ccVm.name}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
       fileUris: []
     }
   }
 }
-
-output fqdn string = pip.properties.dnsSettings.fqdn
