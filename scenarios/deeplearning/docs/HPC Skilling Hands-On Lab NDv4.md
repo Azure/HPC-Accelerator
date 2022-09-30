@@ -183,7 +183,7 @@ sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
 For futher detatils on Production deployment please review blog post [here]
 https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003
 
-7.  Run a nccl check.
+7.  Run a nccl test check for NDv2 series.
 
   - a.Click on the Tab for Array, then select the hpc name for the nodearray, then click the edit so you can edit the current configuration for that node array.
 
