@@ -29,10 +29,10 @@ param tenantId string = tenant().tenantId
 ])
 param azureSovereignCloud string = 'public'
 
-@maxLength(12)
+@maxLength(5)
 param prefix string
 param virtualMachineSize string = 'Standard_D2s_v4'
-param adminUsername string
+param adminUsername string = 'ccadmin'
 
 @secure()
 param adminPassword string
