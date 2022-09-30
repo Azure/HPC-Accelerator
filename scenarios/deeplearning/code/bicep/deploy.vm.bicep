@@ -22,8 +22,8 @@ var pipName = '${prefix}-ip'
 var vmName = '${prefix}-vm'
 var storageAccountName = uniqueResourceNameBase
 
-resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
-  name: nicName
+resource ccNic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
+  name: '${nicName}-cc'
   tags: tags
   location: location
   properties: {
@@ -32,76 +32,56 @@ resource nic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
         name: 'ipconfig1'
         properties: {
           subnet: {
-            id: defaultSubnet.id
+            id: ccSubnet.id
           }
           privateIPAllocationMethod: 'Dynamic'
-          publicIPAddress: {
-            id: pip.id
-            properties: {
-              deleteOption: 'Detach'
-            }
-          }
         }
       }
     ]
     networkSecurityGroup: {
-      id: nsg.id
+      id: ccNsg.id
     }
   }
 }
 
-resource nsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
-  name: nsgName
+resource jumpBoxNic 'Microsoft.Network/networkInterfaces@2022-01-01' = {
+  name: '${nicName}-jb'
   tags: tags
   location: location
   properties: {
-    securityRules: [
+    ipConfigurations: [
       {
-        name: 'HTTPS'
+        name: 'ipconfig1'
         properties: {
-          priority: 1010
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '443'
-        }
-      }
-      {
-        name: 'HTTP'
-        properties: {
-          priority: 1020
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: '*'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '80'
-        }
-      }
-      {
-        name: 'vnet-allow-ssh'
-        properties: {
-          priority: 1030
-          protocol: 'TCP'
-          access: 'Allow'
-          direction: 'Inbound'
-          sourceApplicationSecurityGroups: []
-          destinationApplicationSecurityGroups: []
-          sourceAddressPrefix: 'VirtualNetwork'
-          sourcePortRange: '*'
-          destinationAddressPrefix: '*'
-          destinationPortRange: '22'
+          subnet: {
+            id: jumpBoxSubnet.id
+          }
+          privateIPAllocationMethod: 'Dynamic'
+          publicIPAddress: null
         }
       }
     ]
+    networkSecurityGroup: {
+      id: jumpBoxNsg.id
+    }
+  }
+}
+
+resource jumpBoxNsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
+  name: '${nsgName}-jumpbox'
+  tags: tags
+  location: location
+  properties: {
+    securityRules: []
+  }
+}
+
+resource ccNsg 'Microsoft.Network/networkSecurityGroups@2019-02-01' = {
+  name: '${nsgName}-cc'
+  tags: tags
+  location: location
+  properties: {
+    securityRules: []
   }
 }
 
@@ -117,24 +97,36 @@ resource vnet 'Microsoft.Network/virtualNetworks@2022-01-01' = {
     }
     subnets: [
       {
-        name: 'default'
+        name: 'jumpbox'
         properties: {
-          addressPrefix: '10.8.0.0/24'
+          addressPrefix: '10.8.128.0/26'
+        }
+      }
+      {
+        name: 'cyclecloud'
+        properties: {
+          addressPrefix: '10.8.192.0/26'
+        }
+      }
+      {
+        name: 'compute'
+        properties: {
+          addressPrefix: '10.8.1.0/24'
         }
       }
       {
         name: 'AzureBastionSubnet'
         properties: {
-          addressPrefix: '10.8.1.0/24'
+          addressPrefix: '10.8.0.0/25'
         }
       }
     ]
   }
 }
 
-resource defaultSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
+resource ccSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
   parent: vnet
-  name: 'default'
+  name: 'cyclecloud'
 }
 
 resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
@@ -142,20 +134,25 @@ resource bastionSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' ex
   name: 'AzureBastionSubnet'
 }
 
-resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
-  name: pipName
-  tags: tags
-  location: location
-  sku: {
-    name: 'Standard'
-  }
-  properties: {
-    publicIPAllocationMethod: 'Static'
-    dnsSettings: {
-      domainNameLabel: prefix
-    }
-  }
+resource jumpBoxSubnet 'Microsoft.Network/virtualNetworks/subnets@2022-01-01' existing = {
+  parent: vnet
+  name: 'jumpbox'
 }
+
+// resource pip 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
+//   name: pipName
+//   tags: tags
+//   location: location
+//   sku: {
+//     name: 'Standard'
+//   }
+//   properties: {
+//     publicIPAllocationMethod: 'Static'
+//     dnsSettings: {
+//       domainNameLabel: prefix
+//     }
+//   }
+// }
 
 resource pipBastion 'Microsoft.Network/publicIPAddresses@2022-01-01' = {
   name: '${pipName}-bastion'
@@ -173,8 +170,8 @@ resource mi 'Microsoft.ManagedIdentity/userAssignedIdentities@2018-11-30' existi
   name: '${prefix}-mi'
 }
 
-resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
-  name: vmName
+resource ccVm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
+  name: '${vmName}-cc'
   tags: tags
   location: location
   plan: {
@@ -222,7 +219,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
     networkProfile: {
       networkInterfaces: [
         {
-          id: nic.id
+          id: ccNic.id
           properties: {
             deleteOption: 'Detach'
           }
@@ -230,7 +227,7 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       ]
     }
     osProfile: {
-      computerName: vmName
+      computerName: '${vmName}-cc'
       adminUsername: adminUsername
       adminPassword: adminPassword
       linuxConfiguration: {
@@ -239,6 +236,53 @@ resource vm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
         }
       }
       customData: loadFileAsBase64('../cloud-init/cloud-init.yaml')
+    }
+    diagnosticsProfile: {
+      bootDiagnostics: {
+        enabled: true
+      }
+    }
+  }
+}
+
+resource jumpBoxVm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
+  name: '${vmName}-jb'
+  tags: tags
+  location: location
+  identity: null
+  properties: {
+    hardwareProfile: {
+      vmSize: virtualMachineSize
+    }
+    storageProfile: {
+      osDisk: {
+        createOption: 'fromImage'
+        managedDisk: {
+          storageAccountType: 'StandardSSD_LRS'
+        }
+        deleteOption: 'Delete'
+      }
+      imageReference: {
+        publisher: 'MicrosoftWindowsDesktop'
+        offer: 'Windows-10'
+        sku: '21h1-pron'
+        version: 'latest'
+      }
+    }
+    networkProfile: {
+      networkInterfaces: [
+        {
+          id: jumpBoxNic.id
+          properties: {
+            deleteOption: 'Detach'
+          }
+        }
+      ]
+    }
+    osProfile: {
+      computerName: substring('${vmName}-jb', 0, 15)
+      adminUsername: adminUsername
+      adminPassword: adminPassword
     }
     diagnosticsProfile: {
       bootDiagnostics: {
@@ -273,7 +317,7 @@ resource bastion 'Microsoft.Network/bastionHosts@2022-01-01' = {
 }
 
 resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-01' = {
-  parent: vm
+  parent: ccVm
   location: location
   name: 'CustomScript'
   properties: {
@@ -283,10 +327,8 @@ resource customScriptExt 'Microsoft.Compute/virtualMachines/extensions@2022-03-0
     autoUpgradeMinorVersion: true
     settings: {}
     protectedSettings: {
-      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep ${secondsToWaitBeforeCustomScriptExec}; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${pip.properties.dnsSettings.fqdn}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --useLetsEncrypt --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
+      commandToExecute: 'while [ ! -f /root/ccloud_install.py ]; do echo "WARN: /root/ccloud_install.py not present, sleeping for 5s"; sleep 5; done; sleep ${secondsToWaitBeforeCustomScriptExec}; python3 /root/ccloud_install.py --azureSovereignCloud "${azureSovereignCloud}" --tenantId "${tenantId}" --username "${adminUsername}" --hostname "${ccVm.name}" --password "${adminPassword}" --storageAccount ${storageAccountName} --resourceGroup ${resourceGroup().name} --useManagedIdentity --acceptTerms --webServerPort 80 --webServerSslPort 443 --webServerMaxHeapSize 4096M'
       fileUris: []
     }
   }
 }
-
-output fqdn string = pip.properties.dnsSettings.fqdn

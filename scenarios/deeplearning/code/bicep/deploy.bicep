@@ -29,15 +29,16 @@ param tenantId string = tenant().tenantId
 ])
 param azureSovereignCloud string = 'public'
 
-@maxLength(12)
+@maxLength(5)
+@description('Prefix to use for resources, must be maximum of 5 characters')
 param prefix string
-param virtualMachineSize string
-param adminUsername string
+param virtualMachineSize string = 'Standard_D2s_v4'
+param adminUsername string = 'ccadmin'
 
 @secure()
 param adminPassword string
 
-var contributorRoleDefinitionId = '/providers/Microsoft.Authorization/roleDefinitions/b24988ac-6180-42a0-ab88-20f7382dd24c'
+var contributorRoleDefinitionId = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var rgName = '${prefix}-rg'
 var uniqueResourceNameBase = uniqueString(subscription().id, location, tenantId, prefix)
 var tagName = 'dlId'
@@ -63,11 +64,10 @@ resource ra 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid(uniqueResourceNameBase)
   properties: {
     principalId: mi.outputs.principalId
-    roleDefinitionId: contributorRoleDefinitionId
+    roleDefinitionId: tenantResourceId('Microsoft.Authorization/roleDefinitions', contributorRoleDefinitionId)
     principalType: 'ServicePrincipal'
   }
 }
-
 
 module vm 'deploy.vm.bicep' = {
   scope: rg
@@ -85,5 +85,3 @@ module vm 'deploy.vm.bicep' = {
   }
   dependsOn: [ra]
 }
-
-output fqdn string = vm.outputs.fqdn

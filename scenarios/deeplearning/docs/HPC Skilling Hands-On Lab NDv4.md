@@ -1,6 +1,6 @@
-# HPC Skilling Hands-On Exercises
+# HPC Skilling Hands-On Lab
 
-Large Scale Deep Learning Module: Part 2
+Large Scale Deep Learning Hands On Lab for NDv4 VM Series
 
 # Intended Use
 
@@ -11,8 +11,6 @@ Large Scale Deep Learning Module: Part 2
 ·    Knowledge, skills and objectives
 
 ·    An introduction to the NDv4 VM on Azure
-
- The exercises here comprise the second part of this module; you are expected to have completed the Part 1 exercise first.
 
  # Prerequisites
 
@@ -27,11 +25,16 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
   - Select `Codespaces` tab
 
 ![Create Codespace](./images/0-CodespacesTab.png)  
-  - If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
+
+- Click `Create codespace`
+- Choose the `2 core` option
+
+![Create Codespace](./images/create-codespace.png)
+
+- If you don't see `Codespaces` tab, you will need to first [link your Microsoft alias to your GitHub account](https://docs.opensource.microsoft.com/github/accounts/linking/) 
 
 ![Create Codespace](./images/0-OpenWithCodespaces.jpg)
-- Click `New codespace`
-- Choose the `2 core` option
+
 - Install azure cli `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash` 
 - Log in to Azure from a bash or zsh terminal via: `az login --use-device-code`
 - Add require additional extension `az extension add --name ssh`
@@ -80,7 +83,7 @@ PREFIX=codespace01
 myuser=ccadmin
 ```
 ```
-VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm --query id -o tsv)
+VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm-cc --query id -o tsv)
 az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
 
@@ -99,21 +102,28 @@ wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deep
 chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $PREFIX $region
 ```
 
-![Upload completed](./images/upload_completed.png)
+![Upload completed](./images/cc-cluster-template.png)
 
 Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
 
-4. Create a Slurm Cluster using the custom template "slurm-ngc":
+4. Start the Slurm Cluster deeplearning:
 
-  - a.Go to the azure portal and locate the CycleCloud server DNS name. Copy and pasted on the web browser.
+  - a.Go to the azure portal and locate the Windows Jumpbox. The VM name will have the following name "prefix"-vm-jb. 
+ 
+  - b.Next Connect to the VM using the Bastion mode. Using the username and passoword you already gave on the deployment process. 
 
-  - b.Log in to Azure CycleCloud via the web-based GUI.
+  - c.Using Bastion RDP session open the browser on the remote VM and put the of the "CycleCloud UI IP" that came up in the terminal. 
+ 
+  - d.Log in to Azure CycleCloud using the same credentials on the web GUI.
 
 ![Put your username and password.](./images/ui_cc01.png)
 
-  - c.Then click "start" on the cluster.
+
+  - e.Then click "start" on the cluster.
 
 ![Clusters templates.](./images/ui_cc06.png)
+
+### Note. If you don't have access to ND A100 v4 Series (Standard_ND96amsr_A100_v4 or Standard_ND96asr_A100_v4) you would only be able to do succesfully up to step 5. If you have access to NDv2 please jump to step 7.   
 
 5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
 
@@ -138,14 +148,8 @@ scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{prin
 ssh -q -o "StrictHostKeyChecking no" $scheduler
  ```
 
-  - c.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
-
 ```
-sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
-```
-
-```
-wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/javier02/scenarios/deeplearning/code/script/simpleslurmjob.sh
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/simpleslurmjob.sh
 sbatch simpleslurmjob.sh
 ```
 
@@ -155,7 +159,14 @@ sbatch simpleslurmjob.sh
 
 6. Run a nccl check.
 
-- a.Run a script for testing nccl. Then execute the job via Slurm as follows:
+  - a.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
+
+```
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+```
+wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
+
+- b.Run a script for testing nccl. Then execute the job via Slurm as follows:
 
 ```
 wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
@@ -169,6 +180,46 @@ sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
 
  For additional details, consult the performance considerations blog post [here](https://techcommunity.microsoft.com/t5/azure-global/performance-considerations-for-large-scale-deep-learning/ba-p/2693834).**
+For futher detatils on Production deployment please review blog post [here]
+https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003
+
+7.  Run a nccl test check for NDv2 series.
+
+  - a.Click on the Tab for Array, then select the hpc name for the nodearray, then click the edit so you can edit the current configuration for that node array.
+
+![Slurm Ndv4 job.](./images/edit-nodearray.png)
+
+  - b.Replace the '$HPCMachineType' with 'Standard_ND40rs_v2' , then go to the bottom of that window and expand the section *Other Settings*.
+  
+  ![Slurm Ndv4 job.](./images/edit-machinetype.png)
+
+  - c. In that window go to the bottom and delete the *ClusterInitSpecs* text box. Paste below settings:
+  ```
+  =['slurm:default'=[Order=1000;Name="cyclecloud/slurm:default:2.6.4";Spec="default";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud";Optional=true];'slurm_pyxis_enroot:default:1.0.0'=[Order=10010;Name="slurm_pyxis_enroot:default:1.0.0";Spec="default";Project="slurm_pyxis_enroot";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'misc_ndv4:default:1.0.0'=[Order=10000;Name="misc_ndv4:default:1.0.0";Spec="default";Project="misc_ndv4";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'slurm:execute'=[Order=1003;Name="cyclecloud/slurm:execute:2.6.4";Spec="execute";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud"]]
+  ```
+  Take a look at the picture below to make the changes. After that click save.
+
+![Slurm Ndv4 job.](./images/edit-clusterinispec.png)
+
+
+  - d. Go back to the linux shell on the scheduler and execute the cmd below. 
+```
+sudo /opt/cycle/slurm/cyclecloud_slurm.sh scale
+```
+    
+  **You should see a message like the picture below.**
+![Slurm Ndv4 job.](./images/edit-cmdmsg.png)
+
+  - e. Now you are ready to run nccl test. Run the cmds bellow to download the job script and submit the slurm pyxis job.  
+
+```
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/nccl%20test%20ND40rs_v2/run_nccl_tests_slurm_enroot.slrm
+
+chmod +x run_nccl_tests_slurm_enroot.slrm
+
+sbatch -N 1 -p hpc ./run_nccl_tests_slurm_enroot.slrm
+
+```
 
 **Optional: Cleanup**
 
