@@ -70,7 +70,6 @@ az deployment sub create -l $region --template-file deploy.bicep
 - prefix
 - adminPassword
 
-![Bicep deployment](./images/bicep_deployment01.png)
 
 2. After the deployment has been completed you need to login to the CycleCloud VM using Azure Bastion throught ssh.
 
@@ -178,8 +177,8 @@ sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
 
  For additional details, consult the performance considerations blog post [here](https://techcommunity.microsoft.com/t5/azure-global/performance-considerations-for-large-scale-deep-learning/ba-p/2693834).**
-For futher detatils on Production deployment please review blog post [here]
-https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003
+For futher detatils on Production deployment please review blog post [here](
+https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003)
 
 7.  Run a nccl test check for NDv2 series.
 
