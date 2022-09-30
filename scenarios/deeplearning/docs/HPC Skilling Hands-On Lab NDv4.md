@@ -183,6 +183,43 @@ sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
 For futher detatils on Production deployment please review blog post [here]
 https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003
 
+7.  Run a nccl check.
+
+  - a.Click on the Tab for Array, then select the hpc name for the nodearray, then click the edit so you can edit the current configuration for that node array.
+
+![Slurm Ndv4 job.](./images/edit-nodearray.png)
+
+  - b.Replace the '$HPCMachineType' with 'Standard_ND40rs_v2' , then go to the bottom of that window and expand the section *Other Settings*.
+  
+  ![Slurm Ndv4 job.](./images/edit-machinetype.png)
+
+  - c. In that window go to the bottom and delete the *ClusterInitSpecs* text box. Paste below settings:
+  ```
+  =['slurm:default'=[Order=1000;Name="cyclecloud/slurm:default:2.6.4";Spec="default";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud";Optional=true];'slurm_pyxis_enroot:default:1.0.0'=[Order=10010;Name="slurm_pyxis_enroot:default:1.0.0";Spec="default";Project="slurm_pyxis_enroot";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'misc_ndv4:default:1.0.0'=[Order=10000;Name="misc_ndv4:default:1.0.0";Spec="default";Project="misc_ndv4";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'slurm:execute'=[Order=1003;Name="cyclecloud/slurm:execute:2.6.4";Spec="execute";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud"]]
+  ```
+  Take a look at the picture below to make the changes. After that click save.
+
+![Slurm Ndv4 job.](./images/edit-clusterinispec.png)
+
+
+  - d. Go back to the linux shell on the scheduler and execute the cmd below. 
+```
+sudo /opt/cycle/slurm/cyclecloud_slurm.sh scale
+```
+    You should see a message like the picture below.
+![Slurm Ndv4 job.](./images/edit-cmdmsg.png)
+
+  - e. Now you are ready to run nccl test. Run the cmds bellow to download the job script and submit the slurm pyxis job.  
+
+```
+wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/nccl%20test%20ND40rs_v2/run_nccl_tests_slurm_enroot.slrm
+
+chmod +x run_nccl_tests_slurm_enroot.slrm
+
+sbatch -N 1 -p hpc ./run_nccl_tests_slurm_enroot.slrm
+
+```
+
 **Optional: Cleanup**
 
 If you want to clean up the environment, you can run the destroy script to complete this as a final step.
