@@ -41,6 +41,12 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 - Accept the terms for CycleCloud Marketplace image `az vm image terms accept --urn azurecyclecloud:azure-cyclecloud:cyclecloud8:latest`
 - Proceed to overview
 
+> **Note: if you don't have codespaces then use Cloud Shell and clone the repo:**
+> 1. Open Cloud Shell in the portal
+> 1. type `git clone https://github.com/Azure/APC-Accelerator`
+> 1. cd `HPC-Accelerator`
+> 1. Then follow steps from accept image terms (just before Overview)
+
 # Overview
 
  These hands-on exercises emphasize the development of **skills** in support of the large-scale Deep Learning module. Once complete, a clearer understanding of this scenario is a reasonable outcome, as is the use of GPUs for Deep Learning on Azure.
