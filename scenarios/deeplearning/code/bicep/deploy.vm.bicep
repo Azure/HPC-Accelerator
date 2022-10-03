@@ -280,7 +280,7 @@ resource jumpBoxVm 'Microsoft.Compute/virtualMachines@2021-07-01' = {
       ]
     }
     osProfile: {
-      computerName: substring('${vmName}-jb', 0, 15)
+      computerName: take('${vmName}-jb', 15)
       adminUsername: adminUsername
       adminPassword: adminPassword
     }
