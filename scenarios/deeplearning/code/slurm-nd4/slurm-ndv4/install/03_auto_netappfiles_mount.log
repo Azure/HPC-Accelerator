@@ -1,0 +1,101 @@
+[1] 21:18:03 [SUCCESS] jumpbox
+Loaded plugins: langpacks
+Resolving Dependencies
+--> Running transaction check
+---> Package nfs-utils.x86_64 1:1.3.0-0.68.el7.2 will be installed
+--> Processing Dependency: gssproxy >= 0.7.0-3 for package: 1:nfs-utils-1.3.0-0.68.el7.2.x86_64
+--> Processing Dependency: libnfsidmap for package: 1:nfs-utils-1.3.0-0.68.el7.2.x86_64
+--> Processing Dependency: libevent for package: 1:nfs-utils-1.3.0-0.68.el7.2.x86_64
+--> Processing Dependency: libnfsidmap.so.0()(64bit) for package: 1:nfs-utils-1.3.0-0.68.el7.2.x86_64
+--> Processing Dependency: libevent-2.0.so.5()(64bit) for package: 1:nfs-utils-1.3.0-0.68.el7.2.x86_64
+--> Running transaction check
+---> Package gssproxy.x86_64 0:0.7.0-30.el7_9 will be installed
+--> Processing Dependency: libini_config >= 1.3.1-31 for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libverto-module-base for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libref_array.so.1(REF_ARRAY_0.1.1)(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libini_config.so.3(INI_CONFIG_1.2.0)(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libini_config.so.3(INI_CONFIG_1.1.0)(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libref_array.so.1()(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libini_config.so.3()(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libcollection.so.2()(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+--> Processing Dependency: libbasicobjects.so.0()(64bit) for package: gssproxy-0.7.0-30.el7_9.x86_64
+---> Package libevent.x86_64 0:2.0.21-4.el7 will be installed
+---> Package libnfsidmap.x86_64 0:0.25-19.el7 will be installed
+--> Running transaction check
+---> Package libbasicobjects.x86_64 0:0.1.1-32.el7 will be installed
+---> Package libcollection.x86_64 0:0.7.0-32.el7 will be installed
+---> Package libini_config.x86_64 0:1.3.1-32.el7 will be installed
+--> Processing Dependency: libpath_utils.so.1(PATH_UTILS_0.2.1)(64bit) for package: libini_config-1.3.1-32.el7.x86_64
+--> Processing Dependency: libpath_utils.so.1()(64bit) for package: libini_config-1.3.1-32.el7.x86_64
+---> Package libref_array.x86_64 0:0.1.5-32.el7 will be installed
+---> Package libverto-tevent.x86_64 0:0.2.5-4.el7 will be installed
+--> Running transaction check
+---> Package libpath_utils.x86_64 0:0.2.1-32.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package            Arch      Version                Repository            Size
+================================================================================
+Installing:
+ nfs-utils          x86_64    1:1.3.0-0.68.el7.2     updates-openlogic    413 k
+Installing for dependencies:
+ gssproxy           x86_64    0.7.0-30.el7_9         updates-openlogic    111 k
+ libbasicobjects    x86_64    0.1.1-32.el7           base-openlogic        26 k
+ libcollection      x86_64    0.7.0-32.el7           base-openlogic        42 k
+ libevent           x86_64    2.0.21-4.el7           base-openlogic       214 k
+ libini_config      x86_64    1.3.1-32.el7           base-openlogic        64 k
+ libnfsidmap        x86_64    0.25-19.el7            base-openlogic        50 k
+ libpath_utils      x86_64    0.2.1-32.el7           base-openlogic        28 k
+ libref_array       x86_64    0.1.5-32.el7           base-openlogic        27 k
+ libverto-tevent    x86_64    0.2.5-4.el7            base-openlogic       9.0 k
+
+Transaction Summary
+================================================================================
+Install  1 Package (+9 Dependent packages)
+
+Total download size: 983 k
+Installed size: 2.5 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                              3.9 MB/s | 983 kB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : libbasicobjects-0.1.1-32.el7.x86_64                         1/10 
+  Installing : libref_array-0.1.5-32.el7.x86_64                            2/10 
+  Installing : libcollection-0.7.0-32.el7.x86_64                           3/10 
+  Installing : libevent-2.0.21-4.el7.x86_64                                4/10 
+  Installing : libnfsidmap-0.25-19.el7.x86_64                              5/10 
+  Installing : libpath_utils-0.2.1-32.el7.x86_64                           6/10 
+  Installing : libini_config-1.3.1-32.el7.x86_64                           7/10 
+  Installing : libverto-tevent-0.2.5-4.el7.x86_64                          8/10 
+  Installing : gssproxy-0.7.0-30.el7_9.x86_64                              9/10 
+  Installing : 1:nfs-utils-1.3.0-0.68.el7.2.x86_64                        10/10 
+  Verifying  : gssproxy-0.7.0-30.el7_9.x86_64                              1/10 
+  Verifying  : libverto-tevent-0.2.5-4.el7.x86_64                          2/10 
+  Verifying  : libpath_utils-0.2.1-32.el7.x86_64                           3/10 
+  Verifying  : libnfsidmap-0.25-19.el7.x86_64                              4/10 
+  Verifying  : libevent-2.0.21-4.el7.x86_64                                5/10 
+  Verifying  : libcollection-0.7.0-32.el7.x86_64                           6/10 
+  Verifying  : libref_array-0.1.5-32.el7.x86_64                            7/10 
+  Verifying  : libbasicobjects-0.1.1-32.el7.x86_64                         8/10 
+  Verifying  : 1:nfs-utils-1.3.0-0.68.el7.2.x86_64                         9/10 
+  Verifying  : libini_config-1.3.1-32.el7.x86_64                          10/10 
+
+Installed:
+  nfs-utils.x86_64 1:1.3.0-0.68.el7.2                                           
+
+Dependency Installed:
+  gssproxy.x86_64 0:0.7.0-30.el7_9       libbasicobjects.x86_64 0:0.1.1-32.el7  
+  libcollection.x86_64 0:0.7.0-32.el7    libevent.x86_64 0:2.0.21-4.el7         
+  libini_config.x86_64 0:1.3.1-32.el7    libnfsidmap.x86_64 0:0.25-19.el7       
+  libpath_utils.x86_64 0:0.2.1-32.el7    libref_array.x86_64 0:0.1.5-32.el7     
+  libverto-tevent.x86_64 0:0.2.5-4.el7  
+
+Complete!
+Stderr: Failed to set locale, defaulting to C
+[1] 22:07:27 [SUCCESS] jumpbox
+script already run

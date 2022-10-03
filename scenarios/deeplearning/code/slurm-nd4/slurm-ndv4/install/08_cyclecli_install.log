@@ -1,0 +1,32 @@
+Getting CLI binaries...
+Installing CC CLI 8
+Getting CLI binaries...
+Archive:  cyclecloud-cli.zip
+   creating: cyclecloud-cli-installer/
+   creating: cyclecloud-cli-installer/packages/
+  inflating: cyclecloud-cli-installer/NOTICE  
+  inflating: cyclecloud-cli-installer/LICENSE  
+  inflating: cyclecloud-cli-installer/install.py  
+  inflating: cyclecloud-cli-installer/README  
+  inflating: cyclecloud-cli-installer/update-path.ps1  
+  inflating: cyclecloud-cli-installer/install.sh  
+  inflating: cyclecloud-cli-installer/install.ps1  
+  inflating: cyclecloud-cli-installer/packages/cyclecloud_cli-8.2.2-py2.py3-none-any.whl  
+~/azurehpc/experimental/deploy_cycle_slurm_ndv4/azhpc_install_config_pyxis_enroot/cyclecloud-cli-installer ~/azurehpc/experimental/deploy_cycle_slurm_ndv4/azhpc_install_config_pyxis_enroot
+Installing CLI...
+Installation Directory: /home/hpcadmin/.cycle/cli
+Scripts Directory: /home/hpcadmin/bin
+Creating virtual environment...
+Installing...
+Creating script references...
+Installation Complete
+Initializing CLI...
+10
+WARNING:cyclecli.config_manager:The configuration "10" already exists. Overwriting it in place.
+Re-initializing. (Note: Current settings may be modified.)
+Initial account already exists, skipping initial account creation.
+CycleCloud configuration stored in /home/hpcadmin/.cycle/config.ini
+CycleCloud 8.2.2-1902
+Available Configurations:
+10 : url = https://10.21.1.5  [CURRENT] 
+~/azurehpc/experimental/deploy_cycle_slurm_ndv4/azhpc_install_config_pyxis_enroot

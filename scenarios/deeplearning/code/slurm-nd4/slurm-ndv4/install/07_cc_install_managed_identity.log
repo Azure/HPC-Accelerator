@@ -1,0 +1,40 @@
+[1] 21:19:33 [SUCCESS] cycleserver
+Setup cyclecloud_config.py for cycleserver
+Creating temp directory /tmp/tmp6vfn10hs for installing CycleCloud
+Debugging arguments: Namespace(acceptTerms=True, applicationId=None, applicationSecret=None, azureSovereignCloud='public', hostname='cycleserver', password='+ODgyZjBiOWUwOWQ4', publickey='ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC8jHwaxpFsYCWmNbII5bTImPb+lvTBNUhABEmIWMWtYf21eyEJSHVDDFYYCUdYnyBhAkQOEY9G78OsXZYMMdLE29pUlSifLmkapP5tgfMVv9X1o1NYilnV0oPSmXi1VckmP8W0sA6nkHY8ycGPNWpuMjsfoQEj9Hritk4PJN+6uK+z1kKiDRfOTvyy7AvDYecgxjY+VyxK1rMd0pDV2uT7cgPdYt6KWaHRTYsU5hI5nxJ8QbKkSk0tbDEHsPC9WR3mApRIS0Nik2VgzLtsCFozuOXVDENEikhn6Q7Bj7NqOtjvVep8m3fsqlmHMJeZXohBIh871v+vPslDhd/HzFTH', resourceGroup=None, storageAccount='jrs02', tenantId=None, useLetsEncrypt=False, useManagedIdentity=True, username='hpcadmin')
+Fetching metadata
+Setting up azure account in CycleCloud and initializing cyclecloud CLI
+Password specified, using it as the admin password
+Storage account specified, using it as the default locker
+CycleCloud account data:
+{"Environment": "public", "AzureRMUseManagedIdentity": true, "AzureResourceGroup": "jrs02-spoke", "AzureRMApplicationId": null, "AzureRMApplicationSecret": null, "AzureRMSubscriptionId": "25c2bacb-f256-40d7-9dd4-5aab5052557c", "AzureRMTenantId": null, "DefaultAccount": true, "Location": "eastus", "Name": "azure", "Provider": "azure", "ProviderId": "25c2bacb-f256-40d7-9dd4-5aab5052557c", "RMStorageAccount": "jrs02", "RMStorageContainer": "cyclecloud"}
+['/opt/cycle_server/cycle_server', 'execute', 'update Application.Setting set Value = false where Name == "authorization.check_datastore_permissions"']
+b'1 record affected\n'
+Setting up azure account in CycleCloud and initializing cyclecloud CLI
+Initializing cylcecloud CLI
+['/usr/local/bin/cyclecloud', 'initialize', '--loglevel=debug', '--batch', '--url=https://localhost', '--verify-ssl=false', '--username=hpcadmin', '--password=+ODgyZjBiOWUwOWQ4']
+b'Welcome to CycleCloud!\nCycleCloud configuration stored in /root/.cycle/config.ini\n'
+['/usr/local/bin/cyclecloud', 'account', 'show', 'azure']
+b'Account not found\n'
+Fetching managed identity
+Registering Azure subscription in CycleCloud
+['/usr/local/bin/cyclecloud', 'account', 'create', '-f', '/tmp/tmp6vfn10hs/azure_data.json']
+b'Account azure created successfully\n'
+['chown', '-R', 'hpcadmin:hpcadmin', '/home/hpcadmin']
+b''
+['chown', '-R', 'hpcadmin:hpcadmin', '/home/hpcadmin']
+b''
+Creating cred file: /tmp/tmp6vfn10hs/credential.json
+Copying config to /opt/cycle_server/config/data/
+CycleCloud application server installation finished
+Navigate to https://cycleserver and login using hpcadmin
+Stderr: INFO:cyclecli:Set log level to: DEBUG
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): localhost:443
+DEBUG:urllib3.connectionpool:https://localhost:443 "GET /db/component?format=text HTTP/1.1" 200 None
+DEBUG:urllib3.connectionpool:Starting new HTTPS connection (1): localhost:443
+DEBUG:urllib3.connectionpool:https://localhost:443 "POST /exec/view?input_format=json&format=json HTTP/1.1" 200 None
+DEBUG:cyclecli.config_manager:Created new configuration default at /root/.cycle/configurations/default
+DEBUG:cyclecli.config_manager:Making default the current configuration
+DEBUG:cyclecli.config_manager:deleting original source file at /root/.cycle/configurations/default
+[1] 22:07:31 [SUCCESS] cycleserver
+script already run

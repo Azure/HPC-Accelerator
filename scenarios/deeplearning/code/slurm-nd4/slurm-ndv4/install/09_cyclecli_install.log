@@ -1,0 +1,94 @@
+[1] 21:20:05 [SUCCESS] jumpbox
+Getting CLI binaries...
+Installing CC CLI 8
+Getting CLI binaries...
+Archive:  cyclecloud-cli.zip
+   creating: cyclecloud-cli-installer/
+   creating: cyclecloud-cli-installer/packages/
+  inflating: cyclecloud-cli-installer/NOTICE  
+  inflating: cyclecloud-cli-installer/LICENSE  
+  inflating: cyclecloud-cli-installer/install.py  
+  inflating: cyclecloud-cli-installer/README  
+  inflating: cyclecloud-cli-installer/update-path.ps1  
+  inflating: cyclecloud-cli-installer/install.sh  
+  inflating: cyclecloud-cli-installer/install.ps1  
+  inflating: cyclecloud-cli-installer/packages/cyclecloud_cli-8.2.2-py2.py3-none-any.whl  
+~/azhpc_install_config_pyxis_enroot/cyclecloud-cli-installer ~/azhpc_install_config_pyxis_enroot
+Installing CLI...
+package python3 is not installed
+Loaded plugins: langpacks
+Resolving Dependencies
+--> Running transaction check
+---> Package python3.x86_64 0:3.6.8-18.el7 will be installed
+--> Processing Dependency: python3-libs(x86-64) = 3.6.8-18.el7 for package: python3-3.6.8-18.el7.x86_64
+--> Processing Dependency: python3-setuptools for package: python3-3.6.8-18.el7.x86_64
+--> Processing Dependency: python3-pip for package: python3-3.6.8-18.el7.x86_64
+--> Processing Dependency: libpython3.6m.so.1.0()(64bit) for package: python3-3.6.8-18.el7.x86_64
+--> Running transaction check
+---> Package python3-libs.x86_64 0:3.6.8-18.el7 will be installed
+---> Package python3-pip.noarch 0:9.0.3-8.el7 will be installed
+---> Package python3-setuptools.noarch 0:39.2.0-10.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package               Arch      Version             Repository            Size
+================================================================================
+Installing:
+ python3               x86_64    3.6.8-18.el7        updates-openlogic     70 k
+Installing for dependencies:
+ python3-libs          x86_64    3.6.8-18.el7        updates-openlogic    6.9 M
+ python3-pip           noarch    9.0.3-8.el7         base-openlogic       1.6 M
+ python3-setuptools    noarch    39.2.0-10.el7       base-openlogic       629 k
+
+Transaction Summary
+================================================================================
+Install  1 Package (+3 Dependent packages)
+
+Total download size: 9.3 M
+Installed size: 47 M
+Downloading packages:
+--------------------------------------------------------------------------------
+Total                                               29 MB/s | 9.3 MB  00:00     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : python3-libs-3.6.8-18.el7.x86_64                             1/4 
+  Installing : python3-3.6.8-18.el7.x86_64                                  2/4 
+  Installing : python3-setuptools-39.2.0-10.el7.noarch                      3/4 
+  Installing : python3-pip-9.0.3-8.el7.noarch                               4/4 
+  Verifying  : python3-setuptools-39.2.0-10.el7.noarch                      1/4 
+  Verifying  : python3-libs-3.6.8-18.el7.x86_64                             2/4 
+  Verifying  : python3-3.6.8-18.el7.x86_64                                  3/4 
+  Verifying  : python3-pip-9.0.3-8.el7.noarch                               4/4 
+
+Installed:
+  python3.x86_64 0:3.6.8-18.el7                                                 
+
+Dependency Installed:
+  python3-libs.x86_64 0:3.6.8-18.el7          python3-pip.noarch 0:9.0.3-8.el7  
+  python3-setuptools.noarch 0:39.2.0-10.el7  
+
+Complete!
+Installation Directory: /home/hpcadmin/.cycle/cli
+Scripts Directory: /home/hpcadmin/bin
+Creating virtual environment...
+Installing...
+Creating script references...
+Installation Complete
+Initializing CLI...
+10
+Welcome to CycleCloud!
+Initial account already exists, skipping initial account creation.
+CycleCloud configuration stored in /home/hpcadmin/.cycle/config.ini
+CycleCloud 8.2.2-1902
+Available Configurations:
+10 : url = https://10.21.1.5  [CURRENT] 
+~/azhpc_install_config_pyxis_enroot
+Stderr: scripts/cyclecli_install.sh: line 47: az: command not found
+Failed to set locale, defaulting to C
+'/home/hpcadmin/bin' not found in your PATH environment variable. Make sure to update it.
+[1] 22:07:45 [SUCCESS] jumpbox
+script already run

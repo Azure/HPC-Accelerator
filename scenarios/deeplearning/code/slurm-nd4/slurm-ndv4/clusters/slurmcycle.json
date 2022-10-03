@@ -1,0 +1,105 @@
+{
+    "UsePublicNetwork": false,
+    "AdditionalNAS": false,
+    "SubnetId": "myprefix-rg/myprefix-vnet/compute",
+    "Region": "myregion",
+    "MaxHPCExecuteCoreCount": 192,
+    "HTCImageName": "cycle.image.ubuntu18",
+    "MaxHTCExecuteCoreCount": 8,
+    "NumberLoginNodes": 1,
+    "AdditionalNFSExportPath": null,
+    "AdditionalNFSMountPoint": null,
+    "HPCImageName": "microsoft-dsvm:ubuntu-hpc:1804:18.04.2021120101",
+    "configuration_slurm_shutdown_policy": "Terminate",
+    "configuration_slurm_accounting_enabled": false,
+    "configuration_slurm_version": "20.11.7-1",
+    "SchedulerMachineType": "Standard_D4s_v3",
+    "NFSSharedMountOptions": null,
+    "AdditionalNFSMountOptions": null,
+    "ReturnProxy": false,
+    "NodeNamePrefix" : "Cluster Prefix",
+    "Credentials": "azure",
+    "Autoscale": false,
+    "NFSType": "Builtin",
+    "SchedulerHostName" : "Cluster Prefix",
+    "NFSAddress": null,
+    "NFSSharedExportPath": "/shared",
+    "AdditonalNFSAddress": null,
+    "HTCUseLowPrio": false,
+    "SchedulerImageName": "cycle.image.ubuntu18",
+    "HTCMachineType": "Standard_D4s_v3",
+    "HPCMachineType": "Standard_ND96asr_v4",
+    "loginMachineType": "Standard_D2s_v3",
+    "HPCMaxScalesetSize": 100,
+    "SchedulerClusterInitSpecs": {
+        "slurm_pyxis_enroot:default:1.0.0": {
+            "Order": 10000,
+            "Name": "slurm_pyxis_enroot:default:1.0.0",
+            "Spec": "default",
+            "Project": "slurm_pyxis_enroot",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        },
+        "nhc:default:1.0.0": {
+            "Order": 10010,
+            "Name": "nhc:default:1.0.0",
+            "Spec": "default",
+            "Project": "nhc",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        },
+        "misc_ubuntu:default:1.0.0": {
+            "Order": 10020,
+            "Name": "misc_ubuntu:default:1.0.0",
+            "Spec": "default",
+            "Project": "misc_ubuntu",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        }
+    },
+    "LoginClusterInitSpecs": {
+        "limits:default:1.0.0": {
+            "Order": 10000,
+            "Name": "limits:default:1.0.0",
+            "Spec": "default",
+            "Project": "limits",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        },
+        "misc_ubuntu:default:1.0.0": {
+            "Order": 10010,
+            "Name": "misc_ubuntu:default:1.0.0",
+            "Spec": "default",
+            "Project": "misc_ubuntu",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        }
+    },
+    "HPCClusterInitSpecs": {
+        "misc_ndv4:default:1.0.0": {
+            "Order": 10000,
+            "Name": "misc_ndv4:default:1.0.0",
+            "Spec": "default",
+            "Project": "misc_ndv4",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        },
+        "slurm_pyxis_enroot:default:1.0.0": {
+            "Order": 10010,
+            "Name": "slurm_pyxis_enroot:default:1.0.0",
+            "Spec": "default",
+            "Project": "slurm_pyxis_enroot",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        },
+        "nhc:default:1.0.0": {
+            "Order": 10020,
+            "Name": "nhc:default:1.0.0",
+            "Spec": "default",
+            "Project": "nhc",
+            "Version": "1.0.0",
+            "Locker": "azure-storage"
+        }
+    },
+    "HTCClusterInitSpecs": {}
+}
