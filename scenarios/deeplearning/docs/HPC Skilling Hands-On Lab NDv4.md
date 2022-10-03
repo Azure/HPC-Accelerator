@@ -74,7 +74,7 @@ az deployment sub create -l $region --template-file deploy.bicep
 
 **Note**.You need to specify:
 - prefix
-- adminPassword
+- adminPassword (only use exclaimation mark `!` as spacial chars)
 
 
 2. After the deployment has been completed you need to login to the CycleCloud VM using Azure Bastion throught ssh.
