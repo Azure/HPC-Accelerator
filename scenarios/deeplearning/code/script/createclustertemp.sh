@@ -22,7 +22,7 @@ sudo cp ../../scripts/slurm-2.6.4.txt /opt/cycle_server/config/data
 cd ../../clusters/
 sed -i "s/myprefix/$3/g" slurmcycle.json
 sed -i "s/myregion/$4/g" slurmcycle.json
-cyclecloud import_cluster -f slurm_cycle.txt -p slurmcycle.json -c Ndv4Slurm -t
+cyclecloud import_cluster -f slurm_cycle.txt -p slurmcycle.json -c Ndv4Slurm
 sleep 2
 cyclecloud create_cluster Ndv4Slurm deeplearning -p slurmcycle.json
 echo "CycleCloud UI IP:"; ip route get 8.8.8.8 | grep -oP 'src \K[^ ]+'
