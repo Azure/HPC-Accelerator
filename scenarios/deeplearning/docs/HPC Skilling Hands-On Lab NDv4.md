@@ -165,7 +165,7 @@ sbatch simpleslurmjob.sh
   - a.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
 
 ```
-sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2] &
 ```
 wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
 
