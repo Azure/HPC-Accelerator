@@ -224,14 +224,7 @@ sbatch -N 1 -p hpc ./run_nccl_tests_slurm_enroot.slrm
 
 ```
 
-**Optional: Cleanup**
+**Cleanup**
 
-If you want to clean up the environment, you can run the destroy script to complete this as a final step.
+If you want to clean up the environment, you can delete resource group on the portal. If you want to retain the cycle cloud deployment for future use then terminate the cluster at the Cycle Cloud UI.
 
-To delete your files, run destroy script. While the destroy script is running, that will ask for approval. Enter yes to accept.
-
-Output: All the resources are deleted in the resource group.
-
-<u>***Schedule cleanup***</u>
-
-To avoid risk of not destroying the files on time, which will result in additional usage costs, you can configure the Destroy script to be run automatically after specific number of days, such as, for example, run the destroy script automatically after 7 days. This can be accomplished using Azure Automation. Refer [this article](https://docs.microsoft.com/en-us/azure/event-grid/ensure-tags-exists-on-new-virtual-machines) for an example scenario.
