@@ -14,11 +14,15 @@ Large Scale Deep Learning Hands On Lab for NDv4 VM Series
 
  # Prerequisites
 
-This lab will leverage Codespaces to perform the module. To learn more about Codespaces, go to [GitHub Codespaces Documentation - GitHub Docs](https://docs.github.com/en/codespaces).
+- GitHub CodeSpaces
+  - To learn more about Codespaces, go to GitHub Codespaces [Documentation - GitHub Docs](https://docs.github.com/en/codespaces).
 
-**Note:** If you cannot use Codespaces, you can use WSL2 with the following tools installed: [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli), [Bicep Tools](https://docs.microsoft.com/en-us/azure/azure-resource-manager/bicep/install)
+OR
 
-## Running the Labs in Github Codespace
+- Azure Cloud Shell
+  - To learn more about Azure Cloud Shell go to [Overview of Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview).
+
+## Deploying the Lab with Github Codespaces
 
 - Go to the GitHub repository for this Lab: [HPC-Accelerator](https://github.com/Azure/HPC-Accelerator)
 - Click the `Code` button on this repo
@@ -35,17 +39,51 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 
 ![Create Codespace](./images/0-OpenWithCodespaces.jpg)
 
-- Install azure cli `curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash`
-- Log in to Azure from a bash or zsh terminal via: `az login --use-device-code`
-- Add require additional extension `az extension add --name ssh`
-- Accept the terms for CycleCloud Marketplace image `az vm image terms accept --urn azurecyclecloud:azure-cyclecloud:cyclecloud8:latest`
-- Proceed to overview
+- Install azure cli: </br> 
+```
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+- Log in to Azure from a Bash or SSH terminal utilizing the following command:</br> 
+```
+az login --tenant 'PASTE YOUR TENANT ID HERE' --use-device-code
+```
+- Add the required SSH extension by using the following command:</br>
+```
+az extension add --name ssh
+```
+- As the deployment is going to be automated through Bicep, we need to accept the terms for Cycle Cloud Marketplace image in advance by running the following command::</br> 
+```
+az vm image terms accept --urn azurecyclecloud:azure-cyclecloud:cyclecloud8:latest
+```
+- Proceed to overview </br> 
 
-> **Note: if you don't have codespaces then use Cloud Shell and clone the repo:**
-> 1. Open Cloud Shell in the portal
-> 1. type `git clone https://github.com/Azure/HPC-Accelerator`
-> 1. cd `HPC-Accelerator`
-> 1. Then follow steps from accept image terms (just before Overview)
+## Deploying the Lab with Azure Cloud Shell
+
+1. Open Cloud Shell in the portal selecting Bash.
+2. Upgrade Bicep:</br>
+```
+az bicep upgrade
+```
+3. Login into your Github account:</br>
+```
+gh auth login
+```
+4. Follow the instructions to login with the following configuration:
+
+![GitHub Login Setup](./images/0-A-GithubConfig.png)
+
+5. Clone the repository:</br>
+```
+gh repo clone Azure/HPC-Accelerator
+```
+6. Switch to the created folder:</br>
+```
+cd HPC-Accelerator
+```
+7. As the deployment is going to be automated through Bicep, we need to accept the terms for Cycle Cloud Marketplace image in advance by running the following command:</br>
+```
+az vm image terms accept --urn azurecyclecloud:azure-cyclecloud:cyclecloud8:latest
+```
 
 # Overview
 
@@ -59,161 +97,174 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 
  **Procedures**
 
- The following steps have been identified for this procedure.
+The following steps have been identified for this procedure.
 
- Azure CycleCloud installation will use an User Managed Identity with Contributor access.
+Azure CycleCloud installation will use an User Managed Identity with Contributor access.
 
-1. Deploy the environment solution to a location `westeurope, southcentralus, eastus, eastus2, westus2` and with bicep:
+1. Navigate to the directory where the Bicep source code is located by running in the console where you cloned the repo:</br>
+```
+cd scenarios/deeplearning/code/bicep/
+```
+
+2. Then we are going to define the parameters to use in Bicep for the deployment. First, the location of the resources to deploy. The regions available are: *westeurope, southcentralus, eastus, eastus2 and westus2*.</br>
+*Notice that:</br>
+    i. There are no spaces between the name of the variable and the equal sign.</br>
+    ii. Theare are no spaces after the equal sign.</br>
+    iii. We are going to use “southcentralus” ONLY for the lab.*</br>
 ```
 region=southcentralus
 ```
+
+3.  Finally, we proceed with the deployment by running the command below.</br>
+*Please Note that the system will require inputting a prefix, username and password for the VMs.*</br>
 ```
-cd scenarios/deeplearning/code/bicep/
 az deployment sub create -l $region --template-file deploy.bicep
 ```
 
-**Note**.You need to specify:
-- prefix
-- adminPassword (only use exclaimation mark `!` as special chars. When you define the variable later, the `!` needs to be escaped. e.g. ```mypass=Secure\!Stuff```)
-
-
-2. After the deployment has been completed you need to login to the CycleCloud VM using Azure Bastion throught ssh.
-
-Note: Please replace jcodespace and ccadmin with you own used on the bicep deployment.
-
+4. After the deployment has been completed, we need to login to the Cycle Cloud VM using the Azure Bastion Service through SSH by running the commands below.</br>
+*Note: Replace the values of the “prefix” and “myuser” with the values you set during the deployment process in the code below.*
 ```
-PREFIX=cs01
-myuser=ccadmin
-```
-```
-VMID=$(az vm show --resource-group $PREFIX-rg --name $PREFIX-vm-cc --query id -o tsv)
-az network bastion ssh --name $PREFIX-bastion --resource-group $PREFIX-rg --auth-type password --target-resource-id $VMID --username $myuser
-```
+prefix=bs002
 
-3. Once in the cyclecloud server you need to execute a script that will create a slurm custom cluster template with Nvidia NGC containers:
+myuser=alpha
 
-Note: Please replace S3tu9P@ssw0rd with you own credentials use on the bicep deployment. Use same `myuser` parameter in step 2 and 3. Use same `region` parameter as used in step 1 and 3
+VMID=$(az vm show --resource-group $prefix-rg --name $prefix-vm-cc --query id -o tsv)
 
+az network bastion ssh --name $prefix-bastion --resource-group $prefix-rg --auth-type password --target-resource-id $VMID --username $myuser
 ```
-myuser=ccadmin
-mypass=S3tu9P@ssw0rd
-PREFIX=cs01
+5. Once in the Cycle Cloud server you need to execute a script that will create a Slurm custom cluster template with Nvidia NGC containers running the code below.</br>
+*Note: Replace the values of “myuser”, “maypass”, “prefix” and “region” variables with the ones you set during the deployment process.*</br>
+```
+myuser=alpha
+
+mypass=Password1
+
+prefix=bs002
+
 region=southcentralus
-```
-```
+
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/createclustertemp.sh
-chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $PREFIX $region
+
+chmod u+x createclustertemp.sh ; ./createclustertemp.sh $myuser $mypass $prefix $region
 ```
 
 ![Upload completed](./images/cc-cluster-template.png)
 
-Make sure you have completed the project upload succesfully and have a message like the one on the picture above.
-
-4. Start the Slurm Cluster deeplearning:
-
-  - a.Go to the azure portal and locate the Windows Jumpbox. The VM name will have the following name "prefix"-vm-jb.
-
-  - b.Next Connect to the VM using the Bastion mode. Using the username and passoword you already gave on the deployment process.
-
-  - c.Using Bastion RDP session open the browser on the remote VM and put the of the "CycleCloud UI IP" that came up in the terminal.
-
-  - d.Log in to Azure CycleCloud using the same credentials on the web GUI.
-
-![Put your username and password.](./images/ui_cc01.png)
+Verify that you have completed the project upload successfully and have a message like the one on the picture above showing the private IP of the Cycle Cloud Portal
 
 
-  - e.Then click "start" on the cluster.
+6. Start the Slurm Cluster deeplearning:
 
-![Clusters templates.](./images/ui_cc06.png)
+    i. Go to the azure portal and locate the Windows Jumpbox. The VM name will have the following name "prefix"-vm-jb.
 
-### Note. If you don't have access to ND A100 v4 Series (Standard_ND96amsr_A100_v4 or Standard_ND96asr_A100_v4) you would only be able to do succesfully up to step 5. If you have access to NDv2 please jump to step 7.
+    ii. Connect to the VM going to Operations>Bastion  and then input the username and password set during the deployment process.
 
-5. Configure sshkey, login to Slurm cluster scheduler and run a test job.
+    iii. Once in the Bastion session opened in the new tab, open Microsoft Edge and type the Cycle Cloud private IP obtained during the deployment process that showed up in the terminal.
+ 
+    iv. Log in to Azure Cycle Cloud using the same credentials on the web GUI.
 
-  - a.Go back to the ssh terminal and run the following:
+    ![Put your username and password.](./images/ui_cc01.png)
 
-Note. My below my username is ccadmin, if you used another username please update commands appropriately.
+    v. Then click "start" on the cluster.
+
+    ![Clusters templates.](./images/ui_cc06.png)
+
+7. While we still have the SSH session open in Cycle Cloud using the Bastion Host, we are going to create a pair of SSHKeys to run a test job.</br>
+*Note: Make sure to replace “USERNAME” with the username you used during the deployment.*</br>
 
 ```
 scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
-sudo ssh -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/ccadmin/.ssh/id_rsa ccadminkey; sudo chown cyclecloud ccadminkey"
-sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler:ccadminkey .ssh/id_rsa
-sudo chown ccadmin .ssh/id_rsa
+
+sudo ssh -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/USERNAME/.ssh/id_rsa USERNAMEkey;sudo chown cyclecloud USERNAMEkey"
+
+sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler: USERNAMEkey .ssh/id_rsa
+
+sudo chown USERNAME .ssh/id_rsa
+
 ls -l .ssh/id_rsa
 ```
 
 ![Slurm test job.](./images/slurmjob01.png)
 
-  - b.Now ssh to the scheduler node.
 
- ```
-scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
-ssh -q -o "StrictHostKeyChecking no" $scheduler
- ```
+8. After that configuration is done, we are going to run the scheduler to test the configuration of Cycle Cloud utilizing the following code:
 
 ```
+scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{print $4}')
+
+ssh -q -o "StrictHostKeyChecking no" $scheduler
+
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/script/simpleslurmjob.sh
+
 sbatch simpleslurmjob.sh
 ```
 
-![Slurm test job.](./images/slurmjob02.png)
+i. After you run the commands above, Azure Cycle Cloud will show “Creating VM” like the image shown below:</br>
 
-![Slurm test job.](./images/slurmjob03.png)
+![Slurm test job.](./images/slurmjob02.png)</br>
 
-6. Run a nccl check.
+ii. Wait until the process finishes to continue.</br>
 
-  - a.Run the following to submit a test slurm job to the HPC partition but before you bring at least 2 nodes online.
+## Running a NCCL test
+
+i. First, we make sure that the nodes are active and ready by running.
 
 ```
-sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2] &
+sudo /opt/cycle/slurm/resume_program.sh deeplearning-hpc-pg0-[1-2]
+```
+
+ii. Then we download the script that we are going to use during the test.
+
 ```
 wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
-
-- b.Run a script for testing nccl. Then execute the job via Slurm as follows:
+```
+iii. Finally, we provide permissions to the file and execute the batch process that will run the SLURM test file.
 
 ```
-wget https://raw.githubusercontent.com/Azure/azurehpc/master/experimental/run_nccl_tests_ndv4/run_nccl_tests_slurm_enroot.slrm
-
 chmod +x run_nccl_tests_slurm_enroot.slrm
 
-sbatch -N 2 -p hpc ./run_nccl_tests_slurm_enroot.slrm
-
+sbatch -N 2 -p htc ./run_nccl_tests_slurm_enroot.slrm
 ```
 
  By running a NCCL allreduce and/or alltoall benchmark (as above), at the scale you plan on running your deep learning training job, you have arrived at a great way to identify problems with the InfiniBand inter-node network or with NCCL performance.
 
- For additional details, consult the performance considerations blog post [here](https://techcommunity.microsoft.com/t5/azure-global/performance-considerations-for-large-scale-deep-learning/ba-p/2693834).**
+ For additional details, consult the performance considerations blog post [here](https://techcommunity.microsoft.com/t5/azure-global/performance-considerations-for-large-scale-deep-learning/ba-p/2693834).
+
 For futher detatils on Production deployment please review blog post [here](
-https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003)
+https://techcommunity.microsoft.com/t5/azure-global/e2e-deployment-of-a-production-ready-ndv4-a100-cluster-targeting/ba-p/3580003).
 
-7.  Run a nccl test check for NDv2 series.
+##  OPTIONAL
 
-  - a.Click on the Tab for Array, then select the hpc name for the nodearray, then click the edit so you can edit the current configuration for that node array.
+Running a NCCL test check for NDv2 series.</br>
+
+1. Click on the Tab for "Array", then select the "hpc" name for the nodearray, then click the "edit" so you can edit the current configuration for that node array.
 
 ![Slurm Ndv4 job.](./images/edit-nodearray.png)
 
-  - b.Replace the '$HPCMachineType' with 'Standard_ND40rs_v2' , then go to the bottom of that window and expand the section *Other Settings*.
+ 2. Replace the '$HPCMachineType' with 'Standard_ND40rs_v2'.
 
-  ![Slurm Ndv4 job.](./images/edit-machinetype.png)
+![Slurm Ndv4 job.](./images/edit-machinetype.png)
 
-  - c. In that window go to the bottom and delete the *ClusterInitSpecs* text box. Paste below settings:
-  ```
-  =['slurm:default'=[Order=1000;Name="cyclecloud/slurm:default:2.6.4";Spec="default";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud";Optional=true];'slurm_pyxis_enroot:default:1.0.0'=[Order=10010;Name="slurm_pyxis_enroot:default:1.0.0";Spec="default";Project="slurm_pyxis_enroot";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'misc_ndv4:default:1.0.0'=[Order=10000;Name="misc_ndv4:default:1.0.0";Spec="default";Project="misc_ndv4";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'slurm:execute'=[Order=1003;Name="cyclecloud/slurm:execute:2.6.4";Spec="execute";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud"]]
-  ```
-  Take a look at the picture below to make the changes. After that click save.
+3. Then go to the bottom of that window and expand the section called “Other Settings”.
+
+In that window go to the bottom and click on the + button to add the “ClusterInitSpecs” text box as shown below and paste the following text on it:
+
+```
+=['slurm:default'=[Order=1000;Name="cyclecloud/slurm:default:2.6.4";Spec="default";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud";Optional=true];'slurm_pyxis_enroot:default:1.0.0'=[Order=10010;Name="slurm_pyxis_enroot:default:1.0.0";Spec="default";Project="slurm_pyxis_enroot";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'misc_ndv4:default:1.0.0'=[Order=10000;Name="misc_ndv4:default:1.0.0";Spec="default";Project="misc_ndv4";Version="1.0.0";Locker="azure-storage";AdditionalSpec=true];'slurm:execute'=[Order=1003;Name="cyclecloud/slurm:execute:2.6.4";Spec="execute";Project="slurm";Version="2.6.4";SourceLocker="cyclecloud"]]
+```
 
 ![Slurm Ndv4 job.](./images/edit-clusterinispec.png)
 
-
-  - d. Go back to the linux shell on the scheduler and execute the cmd below.
+4. Go back to the Linux shell on the scheduler and execute the code below.
 ```
 sudo /opt/cycle/slurm/cyclecloud_slurm.sh scale
 ```
+You should see a message like the picture below. 
 
-  **You should see a message like the picture below.**
 ![Slurm Ndv4 job.](./images/edit-cmdmsg.png)
 
-  - e. Now you are ready to run nccl test. Run the cmds bellow to download the job script and submit the slurm pyxis job.
+Now you are ready to run another NCCL test.
+Run the CMDs below to download the job script and submit the SLURM pyxis job.
 
 ```
 wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deeplearning/code/nccl%20test%20ND40rs_v2/run_nccl_tests_slurm_enroot.slrm
@@ -221,10 +272,11 @@ wget https://raw.githubusercontent.com/Azure/HPC-Accelerator/main/scenarios/deep
 chmod +x run_nccl_tests_slurm_enroot.slrm
 
 sbatch -N 1 -p hpc ./run_nccl_tests_slurm_enroot.slrm
-
 ```
 
-**Cleanup**
+## Clean up
 
-If you want to clean up the environment, you can delete resource group on the portal. If you want to retain the cycle cloud deployment for future use then terminate the cluster at the Cycle Cloud UI.
+If you want to clean up the environment, you can delete the resource group created on the portal. If you want to retain the cycle cloud deployment for future use, then just terminate the cluster at the Cycle Cloud UI.
 
+***
+Revised 11/28/2022 by Brian Santacruz

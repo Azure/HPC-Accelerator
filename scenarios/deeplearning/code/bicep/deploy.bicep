@@ -8,8 +8,9 @@ targetScope = 'subscription'
 //   'westus'
 //   'centralus'
 // ])
-param location string = deployment().location
 
+//Setting location utilizing the deployment location defined
+param location string = deployment().location
 
 @maxValue(600)
 @minValue(0)
@@ -32,11 +33,21 @@ param azureSovereignCloud string = 'public'
 @maxLength(5)
 @description('Prefix to use for resources, must be maximum of 5 characters')
 param prefix string
-param virtualMachineSize string = 'Standard_D2s_v4'
-param adminUsername string = 'ccadmin'
 
+//Setting Size of the VM
+param virtualMachineSize string = 'Standard_D2s_v4'
+
+//Setting VM Credentials
+//param adminUsername string = 'ccadmin'
+@description('Admin username for VMs')
+param adminUsername string
+
+//Prompt user to set the password
 @secure()
+@description('Admin password for VMs')
 param adminPassword string
+
+
 
 var contributorRoleDefinitionId = 'b24988ac-6180-42a0-ab88-20f7382dd24c'
 var rgName = '${prefix}-rg'
