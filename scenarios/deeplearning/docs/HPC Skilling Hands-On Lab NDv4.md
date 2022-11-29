@@ -43,7 +43,7 @@ This lab will leverage Codespaces to perform the module. To learn more about Cod
 
 > **Note: if you don't have codespaces then use Cloud Shell and clone the repo:**
 > 1. Open Cloud Shell in the portal
-> 1. type `git clone https://github.com/Azure/APC-Accelerator`
+> 1. type `git clone https://github.com/Azure/HPC-Accelerator`
 > 1. cd `HPC-Accelerator`
 > 1. Then follow steps from accept image terms (just before Overview)
 
