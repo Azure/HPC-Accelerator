@@ -135,7 +135,6 @@ def filter_min_max_number(min_num_selection, max_num_selection, dict_field, vm_d
     if min_num_selection and max_num_selection:
        new_vm_d = {}
        for sku_name in vm_d:
-#           print(vm_d[sku_name][dict_field],float(min_num_selection),float(max_num_selection))
            if not vm_d[sku_name][dict_field] == "n/a" and (vm_d[sku_name][dict_field] == "do_not_know" or \
                  (vm_d[sku_name][dict_field] >= float(min_num_selection) and \
               vm_d[sku_name][dict_field] <= float(max_num_selection))):
@@ -180,7 +179,6 @@ def vm_report(vm_d):
     print("")
     print("{:<23} {:<50} {:<13} {:<14} {:<20} {:<17} {:<17} {:<8} {:<12}".format("VM Name", "CPU type", "Number vCPU's", "Mem Size (GiB)", "Local SSD Size (GiB)", "Network BW (Mbps)", "Infiniband (Gbps)", "GPU Type", "Cost/Month"))
     print("{:=<23} {:=<50} {:=<13} {:=<14} {:=<20} {:=<17} {:=<17} {:=<8} {:=<12}".format("=", "=", "=", "=", "=", "=", "=", "=", "="))
-#    for sku_name in vm_d:
     for sku_name, value in sorted(vm_d.items(), key=lambda item: item[1]['cost_per_month']):
         cpu_type = "{} ({})".format(vm_d[sku_name]["vendor"], vm_d[sku_name]["processor_name"])
         number_vcpus = int(vm_d[sku_name]["number_vcpus"])
@@ -245,7 +243,3 @@ def handle_data():
 
     (region, vm_d) = main(request.form['region'], request.form.getlist('checkbox_processor'), request.form.get('radio_hyperthreading'), request.form.get('radio_avx512'), request.form['cores_slider'],  request.form['cpu_mem_slider'], request.form['cpu_freq_slider'], request.form.getlist('checkbox_ib'), request.form.getlist('checkbox_gpu'), request.form['gpu_slider'],  request.form['ssd_slider'], request.form.getlist('checkbox_md'))
     return render_template('table.html', region=region, result=vm_d)
-
-
-#if __name__ == "__main__":
-#    main()
