@@ -211,8 +211,6 @@ def extract_slider_values(val_str):
 
 
 def main(region, processor_l, hyperthreading, avx512, cores_slider, cpu_mem_slider, cpu_freq_slider, infiniband_l, gpu_l, gpu_slider, ssd_slider, md_l):
-
-#    print("Enter main routine")
     (cores_slider_from, cores_slider_to) = extract_slider_values(cores_slider)
     (cpu_mem_slider_from, cpu_mem_slider_to) = extract_slider_values(cpu_mem_slider)
     (cpu_freq_slider_from, cpu_freq_slider_to) = extract_slider_values(cpu_freq_slider)
@@ -222,12 +220,6 @@ def main(region, processor_l, hyperthreading, avx512, cores_slider, cpu_mem_slid
 
     vm_d = read_excel(excel_file)
     region_vm_price_d =  read_pickle_file()
-#    print(vm_d)
-
-#    if hyperthreading:
-#       print("hyperthreading exists=",hyperthreading)
-#    else:
-#       print("hyperthreading does not exist=",hyperthreading)
     vm_d = filter_str_list(processor_l, "processor_name", vm_d)
     vm_d = filter_str(hyperthreading, "hyperthreading", vm_d)
     vm_d = filter_str(avx512, "avx512", vm_d)
@@ -240,11 +232,6 @@ def main(region, processor_l, hyperthreading, avx512, cores_slider, cpu_mem_slid
     vm_d = filter_str_list(infiniband_l, "infiniband_type", vm_d)
 
     vm_d = filter_region_vm_price(region, vm_d, region_vm_price_d)
-
-#    vm_d = filter_str_list(md_l, "md_type", vm_d)
-#    vm_d = filter_do_not_have_cost(vm_d)
-#    print(vm_d)
-#    vm_report(vm_d)
     return (region, vm_d)
 
 
