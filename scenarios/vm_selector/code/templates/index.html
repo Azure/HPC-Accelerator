@@ -1,0 +1,150 @@
+<!-- /templates/my-form.html-->
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
+</head>
+    <style>
+        input, select {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            display: inline-block;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+input[type=submit] {
+  width: 100%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+input.radio {width: 10%;}
+        div {
+          border-radius: 5px;
+          background-color: #f2f2f2;
+          padding: 20px;
+        }
+input.checkbox {width: 10%;}
+        div {
+          border-radius: 5px;
+          background-color: #f2f2f2;
+          padding: 20px;
+        }
+    </style>
+    <body>
+       <h2>Azure HPC Virtual Machine Selector (PAYGO)</h2>
+       <div>
+        <form action="/report" method="POST">
+                <label for="region"> Region </label>
+                <select name="region">
+                   <option value="southcentralus" selected="selected"> South Central US
+                   <option value="westus"> West US
+                   <option value="westus2"> West US 2
+                   <option value="eastus"> East US
+                   <option value="eastus2"> East US 2
+                   <option value="centralus"> Central US
+                   <option value="westeurope"> West Europe
+                   <option value="uksouth"> UK South
+                   <option value="japaneast"> Japan East
+                   <option value="southeastasia"> South East Asia
+                </select>               
+
+                <p> Processor type</p>
+                <label for="checkbox_genoa">AMD Genoa </label>
+                <input type="checkbox" class="checkbox" id="checkbox_genoa" value="Genoa" name="checkbox_processor">
+                <label for="checkbox_milan">AMD Milan </label>
+                <input type="checkbox" class="checkbox" id="checkbox_milan" value="Milan" name="checkbox_processor">
+                <label for="checkbox_rome">AMD Rome</label>
+                <input type="checkbox" class="checkbox" id="checkbox_rome" value="Rome" name="checkbox_processor">
+                <label for="checkbox_naples">AMD Naples</label>
+                <input type="checkbox" class="checkbox" id="checkbox_naples" value="Naples" name="checkbox_processor">
+                <label for="checkbox_ice">Intel Ice Lake </label>
+                <input type="checkbox" class="checkbox" id="checkbox_ice" value="Ice" name="checkbox_processor"><br>
+                <label for="checkbox_cascade">Intel Cascade Lake </label>
+                <input type="checkbox" class="checkbox" id="checkbox_cascade" value="Cascade" name="checkbox_processor">
+                <label for="checkbox_skylake">Intel Skylake </label>
+                <input type="checkbox" class="checkbox" id="checkbox_skylake" value="Skylake" name="checkbox_processor">
+                <label for="checkbox_broadwell">Intel Broadwell </label>
+                <input type="checkbox" class="checkbox" id="checkbox_broadwell" value="Broadwell" name="checkbox_processor">
+                <label for="checkbox_haswell">Intel Haswell </label>
+                <input type="checkbox" class="checkbox" id="checkbox_haswell" value="Haswell" name="checkbox_processor">
+                <label for="checkbox_ampere_altra">ARM Ampere Altra </label>
+                <input type="checkbox" class="checkbox" id="checkbox_ampere_altra" value="Ampere Altra" name="checkbox_processor"><br><br>
+
+                <p> Hyperthreading</p>
+                <label for="radio_enables">Enabled </label>
+                <input type="radio" class="radio" id="radio_enabled" value="enabled" name="radio_hyperthreading">
+                <label for="radio_disabled">Disabled </label>
+                <input type="radio" class="radio" id="radio_disabled" value="disabled" name="radio_hyperthreading"><br><br><br>
+
+                <p> AVX512</p>
+                <label for="radio_yes">Yes </label>
+                <input type="radio" class="radio" id="radio_yes" value="yes" name="radio_avx512">
+                <label for="radio_no">No </label>
+                <input type="radio" class="radio" id="radio_no" value="no" name="radio_avx512"><br><br><br>
+
+                <label for="cores">Number cores per VM </label>
+                <input type="text" id="cores_slider" class="js-range-slider" name="cores_slider" value=""><br>
+
+                <label for="cpu_mem">Memory size per VM (GiB)</label>
+                <input type="text" id="cpu_mem_slider" class="js-range-slider-2" name="cpu_mem_slider" value=""><br>
+
+                <label for="cpu_freq">CPU Max all turbo freq (GHz)</label>
+                <input type="text" id="cpu_freq_slider" class="js-range-slider-3" name="cpu_freq_slider" value=""><br>
+
+                <p> InfiniBand</p>
+                <label for="checkbox_hdr">NDR (400 Gbps) </label>
+                <input type="checkbox" class="checkbox" id="checkbox_ndr" value="NDR" name="checkbox_ib">
+                <label for="checkbox_hdr">HDR (200 Gbps) </label>
+                <input type="checkbox" class="checkbox" id="checkbox_hdr" value="HDR" name="checkbox_ib">
+                <label for="checkbox_edr">EDR (100 Gbps) </label>
+                <input type="checkbox" class="checkbox" id="checkbox_edr" value="EDR" name="checkbox_ib">
+                <label for="checkbox_fdr">FDR (56 Gbps)</label>
+                <input type="checkbox" class="checkbox" id="checkbox_fdr" value="FDR" name="checkbox_ib"><br><br>
+
+                <p> GPU</p>
+                <label for="checkbox_a100">Nvidia A100 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_a100" value="A100" name="checkbox_gpu">
+                <label for="checkbox_v100">Nvidia V100 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_v100" value="V100" name="checkbox_gpu">
+                <label for="checkbox_p100">Nvidia P100 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_p100" value="P100" name="checkbox_gpu">
+                <label for="checkbox_t4">Nvidia T4 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_t4" value="T4" name="checkbox_gpu">
+                <label for="checkbox_m60">Nvidia M60 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_m60" value="M60" name="checkbox_gpu"><br>
+                <label for="checkbox_a10">Nvidia A10 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_a10" value="A10" name="checkbox_gpu">
+                <label for="checkbox_u250">Xilinx U250 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_u250" value="U250" name="checkbox_gpu">
+                <label for="checkbox_mi25">AMD MI25 </label>
+                <input type="checkbox" class="checkbox" id="checkbox_mi25" value="MI25" name="checkbox_gpu"><br><br><br>
+
+                <label for="gpu">Number of GPU's</label>
+                <input type="text" id="gpu_slider" class="js-range-slider-4" name="gpu_slider" value=""><br>
+
+                <label for="local_ssd">Local SSD size (GiB)</label>
+                <input type="text" id="ssd_slider" class="js-range-slider-5" name="ssd_slider" value=""><br>
+
+                <p> Managed disks (not working yet)</p>
+                <label for="checkbox_standard_md">Standard </label>
+                <input type="checkbox" class="checkbox" id="checkbox_standard_md" value="standard" name="checkbox_md">
+                <label for="checkbox_premium_md">Premium </label>
+                <input type="checkbox" class="checkbox" id="checkbox_premium_md" value="premium" name="checkbox_md">
+                <label for="checkbox_ultra_md">UltraSSD </label>
+                <input type="checkbox" class="checkbox" id="checkbox_ultrassd_md" value="ultrassd" name="checkbox_md"><br><br><br>
+
+            <input type="submit" value="Submit">
+          </form>
+       </div>
+<script src="{{url_for('static', filename='js/slider.js')}}"></script>
+    </body>
+
+</html>

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+table {
+   border-collapse: collapse;
+   width: 100%;
+}
+
+th, td {
+  padding: 8px;
+  text-align:left;
+}
+
+tr:nth-child(even){background-color: #f2f2f2}
+
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+</head>
+<body>
+<h2>Azure HPC Virtual Machine Selector ({{region}}, PAYGO)</h2>
+
+<table>
+  <tr>
+    <th>Name</th>
+    <th>Number Cores</th>
+    <th>VM memory size (GiB)</th>
+    <th>Processor (Freq GHz)</th>
+    <th>Hyperthreading</th>
+    <th>AVX512</th>
+    <th>Local SSD (GiB)</th>
+    <th>InfiniBand (Gbps)</th>
+    <th>GPU (Number)</th>
+    <th>Cost per hour</th>
+  </tr>
+  {% for key, value in result.items()|sort(attribute='1.cost_per_hour') %}
+    <tr>
+      <td>{{ key }}</td>
+      <td>{{ "{:3d}".format(value["number_vcpus"]) }}</td>
+      <td>{{ '{:4d}'.format(value["size_mem_GiB"]) }}</td>
+      <td>{{ value["processor_name"] }}({{value["cpu_freq_GHz"]}})</td>
+      <td>{{ value["hyperthreading"] }}</td>
+      <td>{{ value["avx512"] }}</td>
+      <td>{{ value["size_local_ssd_GiB"] }}</td>
+      <td>{{ value["infiniband_type"] }}({{value["infiniband_speed_Gbps"]}})</td>
+      <td>{{ value["gpu_type"] }}({{ value["number_gpus"] }})</td>
+      <td>{{ "$%.2f"|format(value["cost_per_hour"]) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</body>
+</html> 
