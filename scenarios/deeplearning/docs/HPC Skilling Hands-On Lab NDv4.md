@@ -177,7 +177,7 @@ scheduler=$(cyclecloud show_cluster deeplearning |grep -i scheduler|awk '//{prin
 
 sudo ssh -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler "sudo cp /shared/home/USERNAME/.ssh/id_rsa USERNAMEkey;sudo chown cyclecloud USERNAMEkey"
 
-sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler: USERNAMEkey .ssh/id_rsa
+sudo scp -q -o "StrictHostKeyChecking no" -i /opt/cycle_server/.ssh/cyclecloud.pem cyclecloud@$scheduler:USERNAMEkey .ssh/id_rsa
 
 sudo chown USERNAME .ssh/id_rsa
 
