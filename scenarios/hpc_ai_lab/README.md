@@ -9,7 +9,7 @@
 - [Git](https://git-scm.com/downloads) installed locally
 - [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-windows?tabs=azure-cli)
 - [Microsoft Storage Explorer](https://azure.microsoft.com/en-us/products/storage/storage-explorer/)
-- A copy of this [repository](https://github.com/bsantacruzms/hpc-ai-lab-dev/tree/main) locally (Do not save in a OneDrive location)
+- A copy of this [repository](https://github.com/Azure/HPC-Accelerator/tree/main/scenarios/hpc_ai_lab) locally (Do not save in a OneDrive location)
 - [Visual Studio Code](https://code.visualstudio.com/) for working with the deployable code
 - JSON [extension](https://marketplace.visualstudio.com/search?term=json&target=VSCode&category=All%20categories&sortBy=Relevance) for VS Code to read the deployment templates
 - An Azure subscription
