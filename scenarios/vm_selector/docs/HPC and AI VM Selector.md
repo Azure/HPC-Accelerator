@@ -24,7 +24,7 @@ This table highlights some of the differences that the HPC VM Selector has over 
 
 When using the HPC VM Selector it is recommended to start the search by filtering on one or two key properties that your workload will need.  For example, if your workload will be GPU Processing and you know which GPU is needed, you would choose to enable that option and view the resulting virtual machines.
 
-![Alt text](./imgs/flask1.png)
+![Alt text](../imgs/flask1.png)
 
 ## Azure Installation
 
