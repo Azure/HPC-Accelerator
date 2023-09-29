@@ -59,7 +59,9 @@ If you intend to run the VM Selector tool locally on your own workstation there 
 
 - Install [Python](https://www.python.org/downloads/)
   - Flask will work with any version of Python version 3.7 and newer
-- Install [Flask](https://flask.palletsprojects.com/en/2.2.x/installation/#install-flask/)
+- Install [Flask >=2.0.2](https://flask.palletsprojects.com/en/2.2.x/installation/#install-flask/)
+- Install [pandas >=1.1.3](https://pandas.pydata.org/getting_started.html)
+- Install [openpyxl >=3.0.5](https://pypi.org/project/openpyxl/)
 - Local Web Server built into Flask
 - Active Internet Connection
 
