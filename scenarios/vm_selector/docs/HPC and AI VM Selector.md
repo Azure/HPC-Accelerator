@@ -43,13 +43,12 @@ Running the VM Selector in Azure is the easier method to get started quickly, bu
 - Open the terminal console (CTRL + ~) in VS Code (if not already open) and navigate to the `code` directory from the cloned vm_selector repository, and type the following commands.
     >Note: Wait for each operation to complete before proceeding to the next line:
 
-    * Log in to your tenant.
+  - Log in to your tenant.
       >az login
-    * Set the subscription to use.
+  - Set the subscription to use.
       >az account set -s {subscription id}
-    * Initiate the deployment process to a new web application
+  - Initiate the deployment process to a new web application
       >az webapp up --runtime 'PYTHON:3.9' --sku {Choose a machine sku} --name {Choose a unique name for your webapp} --location {region of deployment. ex. westus3}
-
 
 ## Local Installation
 
@@ -57,13 +56,35 @@ Running the VM Selector in Azure is the easier method to get started quickly, bu
 
 If you intend to run the VM Selector tool locally on your own workstation there a few prerequisites that need to be installed first.
 
+- Have a working [Linux system](https://learn.microsoft.com/en-us/windows/wsl/install)
 - Install [Python](https://www.python.org/downloads/)
   - Flask will work with any version of Python version 3.7 and newer
+- Active Internet Connection
+
+The following requirements will be installed as part of the environment setup 
 - Install [Flask >=2.0.2](https://flask.palletsprojects.com/en/2.2.x/installation/#install-flask/)
 - Install [pandas >=1.1.3](https://pandas.pydata.org/getting_started.html)
 - Install [openpyxl >=3.0.5](https://pypi.org/project/openpyxl/)
 - Local Web Server built into Flask
-- Active Internet Connection
+
 
 ### Deployment
 
+The following steps are needed to run the VM Selector tool locally on your workstation
+  - Clone the repository to your local workstation
+    > git clone <https://github.com/Azure/HPC-Accelerator.git>
+  - Go to the application folder
+    > cd HPC-Accelerator\scenarios\vm_selector
+  - Create a virtual environment for the applicatin
+    > python3 -m venv .venv
+  - Activate the environment
+    > source .venv/bin/activate
+  - Install the dependencies
+    > pip3 install -r requirements.txt
+  - Run the application
+    > flask run
+  - Browse to the application at <http://localhost:5000>
+
+
+
+If you have any issues a [Quickstart Guide](https://learn.microsoft.com/en-us/azure/app-service/quickstart-python/) is available that has a Microsoft published generic app that you can follow to test your environment.
