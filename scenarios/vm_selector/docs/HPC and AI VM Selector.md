@@ -6,7 +6,7 @@ The HPC VM Selector has been created to help architects and customers choose the
 
 ## Overview
 
-The HPC VM Selector tool is great when you are looking for a specific characteristic of a virtual machine that are not available in our public Azure Virtual Machine Selector tool.
+The HPC VM Selector tool is great when you are looking for a specific characteristic of a virtual machine that are not available in our public [Azure Virtual Machine Selector](https://azure.microsoft.com/en-us/pricing/vm-selector/) tool.
 
 This table highlights some of the differences that the HPC VM Selector has over our public offering. It will allow you to choose specific network, GPU or processor types which may affect workload performance.
 
@@ -22,7 +22,7 @@ This table highlights some of the differences that the HPC VM Selector has over 
 |**Infiniband**​|N/A​|NDR (400 Gbps), HDR (200 Gbps), EDR (100 Gbps), FDR (56 Gbps)​|
 |**GPU**​|Just asks if you need VM to be GPU enabled​|Yes/No or No Preference <br />Nvidia A100, Nvidia V100, Nvidia P100, Nvidia T4, Nvidia M60, NvidiaA10, Xilinx U250, AMD MI25​|
 
-When using the HPC VM Selector it is recommended to start the search by filtering on one or two key properties that your workload will need.  For example, if your workload will be GPU Processing and you know which GPU is needed, you would choose to enable that option and view the resulting virtual machines.
+When using the HPC VM Selector it is recommended to start the search by filtering on one or two key properties that your workload will need.  For example, if your workload will be GPU based and you know which GPU is needed, you would choose to enable that option and view the resulting virtual machines.
 
 ![Alt text](../imgs/flask1.png)
 
